@@ -2,6 +2,7 @@
 // Jordan Paul & Ben Sailor
 
 
+
 module stimulus();
 
    logic  clock;
@@ -15,8 +16,6 @@ module stimulus();
 	
    logic [31:0] count, errors;
    logic [31:0] rd1_expect, rd2_expect;
-   
-   logic cycle2, break_test;
 
    logic [111:0] testvectors[10000:0];
    
@@ -41,7 +40,6 @@ module stimulus();
 		count = 0; errors = 0;
 		we3 = 1'b1; // set write enable high
 		
-		cycle2 = 0; break_test = 0; // start cycle at 0 and lower the break flag
      end
 
    
@@ -56,22 +54,19 @@ always @(posedge clock)
 
 always @(negedge clock)
 	begin
-		if (cycle2) begin // capture only after two clock cycles
-			if (rd1 !== rd1_expect | rd2 !== rd2_expect) begin
-				// check if read data 1 matches that of read data 1 expected: same for 2
-				$display("ERROR: Read Address did not match expected case: %d", count);
-				errors = errors + 1;
-			end
-			count = count + 1;
-			
-			if (testvectors[count] === 'bx) begin
-				$display("%d tests completed with %d errors", count, errors);
-				$stop;
-			end
+		if (rd1 !== rd1_expect | rd2 !== rd2_expect) begin
+			// check if read data 1 matches that of read data 1 expected: same for 2
+			$display("ERROR: Read Address did not match expected case: %d", count);
+			errors = errors + 1;
 		end
-		cycle2 = ~cycle2; // toggle the cycle
+		count = count + 1;
+		
+		if (testvectors[count] === 'bx) begin
+			$display("%d tests completed with %d errors", count, errors);
+			$stop;
+		end
+
 	end
 		
 
 endmodule // regfile_tb
-
