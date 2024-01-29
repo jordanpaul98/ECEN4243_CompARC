@@ -1,4 +1,5 @@
 // ECEN 4243 LAB0 regfile.sv
+// Jordan Paul & Ben Sailor
 
 module regfile (input logic         clk, 
 		input logic 	    we3, 
