@@ -1,5 +1,5 @@
 // ECEN 4243 Lab 0 regfile testbench
-
+// Jordan Paul & Ben Sailor
 
 
 module stimulus();
