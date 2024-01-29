@@ -67,4 +67,4 @@ configure wave -rowmargin 4
 configure wave -childrowmargin 2
 
 -- Run the Simulation
-run 120ns
+run 500ns
