@@ -134,11 +134,54 @@ int i_process(char* i_) {
   /* Add other imm instructions here */ 
 
   /* This is an Add Immediate Instruciton */
-  if(!strcmp(d_opcode,"0010011")) {
-    printf("--- This is an ADDI instruction. \n");
-    ADDI(Rd, Rs1, Imm, Funct3);
+  if(!strcmp(d_opcode,"0000011")) {
+    switch(Funct3){
+      case 0x0:
+          LB  (Rd, Rs1, Imm, Funct3);
+          break;
+      case 0x1:
+          LH  (Rd, Rs1, Imm, Funct3);
+          break;
+      case 0x2:
+          LW  (Rd, Rs1, Imm, Funct3);
+          break;
+      case 0x4:
+          LBU (Rd, Rs1, Imm, Funct3);
+          break;
+      case 0x5:
+          LHU (Rd, Rs1, Imm, Funct3);
+          break;
+    }
     return 0;
-  }	  
+  }else if(!strcmp(d_opcode, "0010011")){
+    switch(Funct3){
+      case 0x0: 
+          ADDI  (Rd, Rs1, Imm, Funct3);
+          break;
+      case 0x1:
+          SLLI  (Rd, Rs1, Imm, Funct3);
+          break;
+      case 0x2: 
+          SLTI  (Rd, Rs1, Imm, Funct3);
+          break;
+      case 0x3:
+          SLTIU (Rd, Rs1, Imm, Funct3);
+          break;
+      case 0x4:
+          XORI  (Rd, Rs1, Imm, Funct3);
+          break;
+      case 0x5:
+          // funct7 000000* for SRLI, 010000* for SRAI
+          ((Imm & 0x400) == 0x400) ? SRAI(Rd, Rs1, Imm, Funct3) : SRLI(Rd, Rs1, Imm, Funct3);
+          break;
+      case 0x6:
+          ORI   (Rd, Rs1, Imm, Funct3);
+          break;
+      case 0x7:
+          ANDI  (Rd, Rs1, Imm, Funct3);
+          break;
+    }
+  } 
 
   return 1;	
 }
