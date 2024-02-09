@@ -43,7 +43,7 @@ int BNE (int Rs1, int Rs2, int Imm, int Funct3) {
   int cur = 0;
   Imm = Imm << 1;
   if (CURRENT_STATE.REGS[Rs1] != CURRENT_STATE.REGS[Rs2])
-    NEXT_STATE.PC = (CURRENT_STATE.PC - 4) + (SIGNEXT(Imm,13));
+    NEXT_STATE.PC = (CURRENT_STATE.PC - 4) + (SIGNEXT(Imm,12));
   return 0;
 
 }
@@ -130,14 +130,14 @@ int ANDI (int Rd, int Rs1, int Imm, int Funct3){
 
 // U Instruction    U Instruction   U Instruction
 // U Instruction    U Instruction   U Instruction
-int AUIPC (char* i_);
-int LUI (char* i_);
+int AUIPC (int Rd, int Imm);
+int LUI (int Rd, int Imm);
 
 // S Instruction    S Instruction   S Instruction
 // S Instruction    S Instruction   S Instruction
-int SB (char* i_);
-int SH (char* i_);
-int SW (char* i_);
+int SB (int Rs1, int Rs2, int Imm, int Funct3);
+int SH (int Rs1, int Rs2, int Imm, int Funct3);
+int SW (int Rs1, int Rs2, int Imm, int Funct3);
 
 // R instruction    R instruction   R instruction
 // R instruction    R instruction   R instruction
@@ -235,10 +235,10 @@ int BGEU (int Rs1, int Rs2, int Imm, int Funct3) {
 }
 
 // I instruction
-int JALR (char* i_);
+int JALR (int Rd, int Rs1, int Imm);
 
 // J instruction
-int JAL (char* i_);
+int JAL (int Rd, int imm);
 
 int ECALL (char* i_){return 0;}
 
