@@ -129,7 +129,19 @@ int LUI (int Rd, int Imm);
 
 // S Instruction    S Instruction   S Instruction
 // S Instruction    S Instruction   S Instruction
-int SB (int Rs1, int Rs2, int Imm, int Funct3);
+int SB (int Rs1, int Rs2, int Imm, int Funct3){
+  int effAddr = 0;
+  effAddr = CURRENT_STATE.REGS[Rs1] + SIGNEXT(imm, 12);
+  int mask = 0x3;
+  int offset = effAddr & mask;
+  int allignAddr = effAddr & ~mask;
+  int wordReadData = mem_read_32(allignAddr);
+  int writeData = CURRENT_STATE.REGS[Rs2] & 0xFF;
+  writeData = writeData << 8 * offset;
+  NEXT_STATE.REGS[Rd] = cur;
+  mem_write_32(effAddr, CURRENT_STATE.REGS[Rs2];
+  return 0;
+}
 int SH (int Rs1, int Rs2, int Imm, int Funct3);
 int SW (int Rs1, int Rs2, int Imm, int Funct3);
 
