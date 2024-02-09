@@ -296,9 +296,65 @@ int b_process(char* i_) {
 
 int s_process(char* i_) {
 
-  /* This function execute S type instructions */
+  char d_opcode[8];
+  d_opcode[0] = i_[31-6]; 
+  d_opcode[1] = i_[31-5]; 
+  d_opcode[2] = i_[31-4]; 
+  d_opcode[3] = i_[31-3];
+  d_opcode[4] = i_[31-2]; 
+  d_opcode[5] = i_[31-1]; 
+  d_opcode[6] = i_[31-0]; 
+  d_opcode[7] = '\0';
+  char rs1[6]; rs1[5] = '\0';
+  char rs2[6]; rs2[5] = '\0';		     
+  char funct3[4]; funct3[3] = '\0';
+  char imm[13]; 
+  for(int i = 0; i < 5; i++) {
+    rs1[i] = i_[31-19+i];
+    rs2[i] = i_[31-24+i];                
+  }
+  // Old-fashioned method but works :)
+  imm[0] = i_[31-7]; 
+  imm[1] = i_[31-8]; 
+  imm[2] = i_[31-9]; 
+  imm[3] = i_[31-10];
+  imm[4] = i_[31-11];
 
-  /* Add store instructions here */ 
+  imm[5] = i_[31-25]; 
+  imm[6] = i_[31-26];
+  imm[7] = i_[31-27];
+  imm[8] = i_[31-28];
+  imm[9] = i_[31-29];
+  imm[10] = i_[31-20];
+  imm[11] = i_[31-31];
+  imm[12] = '\0';  
+
+  for(int i = 0; i < 3; i++) {
+    funct3[i] = i_[31-14+i];
+  }
+  int Rs1 = bchar_to_int(rs1);
+  int Rs2 = bchar_to_int(rs2);  
+  int Funct3 = bchar_to_int(funct3);
+  int Imm = bchar_to_int(imm);
+  printf ("Opcode = %s\n Rs1 = %d\n Rs2 = %d\n Imm = %d\n Funct3 = %d\n\n",
+	  d_opcode, Rs1, Rs2, Imm, Funct3);
+  printf("\n");   
+
+  if(!strcmp(d_opcode,"0100011")) {
+    switch(Funct3){
+      case 0x0:
+        SB(Rs1, Rs2, Imm, Funct3);
+        break;
+      case 0x1:
+        SH(Rs1, Rs2, Imm, Funct3);
+        break;
+      case 0x4:
+        SW(Rs1, Rs2, Imm, Funct3);
+        break;
+    }
+    return 0;
+  }	    
+
 
   return 1;
 
@@ -308,7 +364,55 @@ int j_process(char* i_) {
 
   /* This function execute Jump instructions */
 
-  /* Add jump instructions here */ 
+  char d_opcode[8];
+  d_opcode[0] = i_[31-6]; 
+  d_opcode[1] = i_[31-5]; 
+  d_opcode[2] = i_[31-4]; 
+  d_opcode[3] = i_[31-3];
+  d_opcode[4] = i_[31-2]; 
+  d_opcode[5] = i_[31-1]; 
+  d_opcode[6] = i_[31-0]; 
+  d_opcode[7] = '\0';
+   
+  char rd[6]; rd[5] = '\0';
+  char imm[21]; imm[20] = '\0';
+  for(int i = 0; i < 5; i++) {
+    rd[i] = i_[31-11+i];
+  }
+
+  imm[0] = i_[31-12-1]; 
+  imm[1] = i_[31-12-2]; 
+  imm[2] = i_[31-12-3]; 
+  imm[3] = i_[31-12-4];
+  imm[4] = i_[31-12-5];
+  imm[5] = i_[31-12-6]; 
+  imm[6] = i_[31-12-7];
+  imm[7] = i_[31-12-8];
+  imm[8] = i_[31-12-9];
+  imm[9] = i_[31-12-10];
+
+  imm[10] = i_[31-12-11];
+
+  imm[12] = i_[31-12-12]; 
+  imm[13] = i_[31-12-13];
+  imm[14] = i_[31-12-14];
+  imm[15] = i_[31-12-15];
+  imm[16] = i_[31-12-16];
+  imm[17] = i_[31-12-17];
+  imm[18] = i_[31-12-18];
+  imm[19] = i_[31-12-19];
+
+ 
+  int Rd = bchar_to_int(rd);
+  int Imm = bchar_to_int(imm);
+
+  printf ("Opcode = %s\n Imm = %d\n Rd = %d\n\n",
+	  d_opcode, Imm, Rd);
+
+  if(!strcmp(d_opcode,"1101111")) {
+    JAL(Rd, Imm);
+    return 0;
+  }
 
   return 1;
 
@@ -318,7 +422,55 @@ int u_process(char* i_) {
 
   /* This function execute U type instructions */
 
-  /* Add U instructions here */ 
+  char d_opcode[8];
+  d_opcode[0] = i_[31-6]; 
+  d_opcode[1] = i_[31-5]; 
+  d_opcode[2] = i_[31-4]; 
+  d_opcode[3] = i_[31-3];
+  d_opcode[4] = i_[31-2]; 
+  d_opcode[5] = i_[31-1]; 
+  d_opcode[6] = i_[31-0]; 
+  d_opcode[7] = '\0';
+   
+  char rd[6]; rd[5] = '\0';
+  char imm[21]; imm[20] = '\0';
+  for(int i = 0; i < 5; i++) {
+    rd[i] = i_[31-11+i];
+  }
+
+  imm[0] = i_[31-12-1]; 
+  imm[1] = i_[31-12-2]; 
+  imm[2] = i_[31-12-3]; 
+  imm[3] = i_[31-12-4];
+  imm[4] = i_[31-12-5];
+  imm[5] = i_[31-12-6]; 
+  imm[6] = i_[31-12-7];
+  imm[7] = i_[31-12-8];
+  imm[8] = i_[31-12-9];
+  imm[9] = i_[31-12-10];
+
+  imm[10] = i_[31-12-11];
+
+  imm[12] = i_[31-12-12]; 
+  imm[13] = i_[31-12-13];
+  imm[14] = i_[31-12-14];
+  imm[15] = i_[31-12-15];
+  imm[16] = i_[31-12-16];
+  imm[17] = i_[31-12-17];
+  imm[18] = i_[31-12-18];
+  imm[19] = i_[31-12-19];
+
+ 
+  int Rd = bchar_to_int(rd);
+  int Imm = bchar_to_int(imm);
+
+  printf ("Opcode = %s\n Imm = %d\n Rd = %d\n\n",
+	  d_opcode, Imm, Rd);
+
+  if(!strcmp(d_opcode,"0010111")) {
+    AUIPC(Rd, Imm);
+    return 0;
+  }
 
   return 1;
 
