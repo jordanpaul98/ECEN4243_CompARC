@@ -230,12 +230,17 @@ int BGEU (int Rs1, int Rs2, int Imm, int Funct3) {
 
 // I instruction
 int JALR (int Rd, int Rs1, int Imm) {
-
+    NEXT_STATE.PC = CURRENT_STATE.REGS[Rs1] + (SIGNEXT(Imm,20));
+    CURRENT_STATE.REGS[Rd] = CURRENT_STATE.PC + 4;
+    return 0;
 }
 
 // J instruction
-int JAL (int Rd, int imm);
+int JAL (int Rd, int imm) {
+    NEXT_STATE.PC = (SIGNEXT(imm,20));
+    CURRENT_STATE.REGS[Rd] = CURRENT_STATE.PC + 4;
+    return 0;
+}
 
 int ECALL (char* i_){return 0;}
 
-#endif
