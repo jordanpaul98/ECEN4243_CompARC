@@ -123,7 +123,6 @@ int r_process(char* i_) {
         break;
     }
   }
-
   /* Add other data instructions here */ 
 
   return 1;	
@@ -212,6 +211,8 @@ int i_process(char* i_) {
           ANDI  (Rd, Rs1, Imm, Funct3);
           break;
     }
+  } else if (!strcmp(d_opcode, "1100111")) {
+    JALR  (Rd, Rs1, Imm);
   }
 
   return 1;	
@@ -288,11 +289,9 @@ int b_process(char* i_) {
         BGEU(Rs1, Rs2, Imm, Funct3);
         break;
     }
-    return 0;
   }	    
 
   return 1;
-
 }
 
 int s_process(char* i_) {
@@ -353,12 +352,9 @@ int s_process(char* i_) {
         SW(Rs1, Rs2, Imm, Funct3);
         break;
     }
-    return 0;
   }	    
 
-
   return 1;
-
 }
 
 int j_process(char* i_) {
@@ -412,11 +408,9 @@ int j_process(char* i_) {
 
   if(!strcmp(d_opcode,"1101111")) {
     JAL(Rd, Imm);
-    return 0;
   }
 
   return 1;
-
 }
 
 int u_process(char* i_) {
@@ -470,11 +464,11 @@ int u_process(char* i_) {
 
   if(!strcmp(d_opcode,"0010111")) {
     AUIPC(Rd, Imm);
-    return 0;
+  } else if (!strcmp(d_opcode,"0110111")) {
+    LUI(Rd, Imm);
   }
 
   return 1;
-
 }
 
 int interruption_process(char* i_) {
@@ -482,7 +476,6 @@ int interruption_process(char* i_) {
   ECALL(i_);
   RUN_BIT = 0;
   return 0;
-
 }
 
 int decode_and_execute(char* i_) {
