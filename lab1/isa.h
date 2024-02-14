@@ -19,6 +19,8 @@
 
 #define SIGNEXT(v, sb) ((v) | (((v) & (1 << (sb))) ? ~((1 << (sb))-1) : 0))
 
+
+// R instruction    R instruction   R instruction
 int ADD (int Rd, int Rs1, int Rs2, int Funct3) {
   int cur = 0;
   cur = CURRENT_STATE.REGS[Rs1] + CURRENT_STATE.REGS[Rs2];
@@ -26,42 +28,112 @@ int ADD (int Rd, int Rs1, int Rs2, int Funct3) {
   return 0;
 }
 
-int ADDI (int Rd, int Rs1, int Imm, int Funct3) {
+int SUB (int Rd, int Rs1, int Rs2, int Funct3) {
+  int cur = CURRENT_STATE.REGS[Rs1] - CURRENT_STATE.REGS[Rs2];
+  NEXT_STATE.REGS[Rd] = cur;
+  return 0;
+}
 
+int SLL (int Rd, int Rs1, int Rs2, int Funct3) {
+  int cur = CURRENT_STATE.REGS[Rs1] << CURRENT_STATE.REGS[Rs2];
+  NEXT_STATE.REGS[Rd] = cur;
+  return 0;
+}
+
+int SLT (int Rd, int Rs1, int Rs2, int Funct3) {
+  if (CURRENT_STATE.REGS[Rs1] < CURRENT_STATE.REGS[Rs2]) {
+      NEXT_STATE.REGS[Rd] = CURRENT_STATE.REGS[Rs1];
+  }else {
+      NEXT_STATE.REGS[Rd] = CURRENT_STATE.REGS[Rs2];
+  }
+  return 0;
+}
+
+int SLTU (int Rd, int Rs1, int Rs2, int Funct3) {
+  if (CURRENT_STATE.REGS[Rs1] < CURRENT_STATE.REGS[Rs2]){
+    NEXT_STATE.REGS[Rd] = CURRENT_STATE.REGS[Rs1];
+  }else {
+    NEXT_STATE.REGS[Rd] = CURRENT_STATE.REGS[Rs2];
+  }
+  return 0;
+}
+
+int XOR (int Rd, int Rs1, int Rs2, int Funct3) {
+  int cur = CURRENT_STATE.REGS[Rs1] ^ CURRENT_STATE.REGS[Rs2];
+  NEXT_STATE.REGS[Rd] = cur;
+  return 0;
+}
+
+int SRL (int Rd, int Rs1, int Rs2, int Funct3) {
+  int cur = CURRENT_STATE.REGS[Rs1] >> CURRENT_STATE.REGS[Rs2];
+  NEXT_STATE.REGS[Rd] = cur;
+  return 0;
+}
+
+int SRA (int Rd, int Rs1, int Rs2, int Funct3) {
+  int cur = CURRENT_STATE.REGS[Rs1] >>= CURRENT_STATE.REGS[Rs2];
+  NEXT_STATE.REGS[Rd] = cur;
+  return 0;
+}
+
+int OR (int Rd, int Rs1, int Rs2, int Funct3) {
+  int cur = CURRENT_STATE.REGS[Rs1] | CURRENT_STATE.REGS[Rs2];
+  NEXT_STATE.REGS[Rd] = cur;
+  return 0;
+}
+
+int AND (int Rd, int Rs1, int Rs2, int Funct3) {
+  int cur = CURRENT_STATE.REGS[Rs1] & CURRENT_STATE.REGS[Rs2];
+  NEXT_STATE.REGS[Rd] = cur;
+  return 0;
+}
+// R instruction    R instruction   R instruction
+
+
+
+
+// I Instructions   I Instructions    I Instructions
+int ADDI (int Rd, int Rs1, int Imm, int Funct3) {
   int cur = 0;
   cur = CURRENT_STATE.REGS[Rs1] + SIGNEXT(Imm,12);
   NEXT_STATE.REGS[Rd] = cur;
   return 0;
-
 }
 
-int BNE (int Rs1, int Rs2, int Imm, int Funct3) {
-
-  int cur = 0;
-  Imm = Imm << 1;
-  if (CURRENT_STATE.REGS[Rs1] != CURRENT_STATE.REGS[Rs2])
-    NEXT_STATE.PC = (CURRENT_STATE.PC - 4) + (SIGNEXT(Imm,12));
-  return 0;
-
-}
-
-// I Instructions   I Instructions    I Instructions
-// I Instructions   I Instructions    I Instructions
 int LB (int Rd, int Rs1, int Imm, int Funct3){
-  int cur = CURRENT_STATE.REGS[Rs1];
-  NEXT_STATE.REGS[Rd] = cur;
+  int address = CURRENT_STATE.REGS[Rs1] + Imm;
+  uint32_t word = mem_read_32(address);
+  int8_t byte;
+  if (address & 0x3 == 0) {
+    byte = word & 0xFF;
+  } else if ((address & 0x3) == 1) {
+    byte = (word >> 8) & 0xFF;
+  } else if ((address & 0x3) == 2) {
+    byte = (word >> 16) & 0xFF;
+  } else {
+    byte = (word >> 24) & 0xFF;
+  }
+  NEXT_STATE.REGS[Rd] = SIGNEXT(byte, 7);
   return 0;
 }
 
 int LH (int Rd, int Rs1, int Imm, int Funct3){
-  int cur = CURRENT_STATE.REGS[Rs1];
-  NEXT_STATE.REGS[Rd] = cur;
+  int address = CURRENT_STATE.REGS[Rs1] + Imm;
+  uint32_t word = mem_read_32(address);
+  int16_t halfword;
+  if (address & 0x2) {
+    halfword = (word >> 16) & 0xffff;
+  } else {
+    halfword = word & 0xffff;
+  }
+  NEXT_STATE.REGS[Rd] = SIGNEXT(halfword, 15);
   return 0;
 }
 
 int LW (int Rd, int Rs1, int Imm, int Funct3){
-  int cur = CURRENT_STATE.REGS[Rs1];
-  NEXT_STATE.REGS[Rd] = cur;
+  int address = CURRENT_STATE.REGS[Rs1] + Imm;
+  int word = mem_read_32(address);
+  NEXT_STATE.REGS[Rd] = word;
   return 0;
 }
 
@@ -124,161 +196,140 @@ int ANDI (int Rd, int Rs1, int Imm, int Funct3){
   NEXT_STATE.REGS[Rd] = cur;
   return 0;
 }
+// I Instructions   I Instructions    I Instructions
 
-// U Instruction    U Instruction   U Instruction
+
+
+
 // U Instruction    U Instruction   U Instruction
 int AUIPC (int Rd, int Imm) {
-
+  NEXT_STATE.REGS[Rd] = CURRENT_STATE.PC + (Imm << 12);
   return 0;
-} // FIXME:
+}
 
 int LUI (int Rd, int Imm) {
-
+  NEXT_STATE.REGS[Rd] = Imm << 12;
   return 0;
-} // FIXME:
+}
+// U Instruction    U Instruction   U Instruction
 
-// S Instruction    S Instruction   S Instruction
+
+
+
 // S Instruction    S Instruction   S Instruction
 int SB (int Rs1, int Rs2, int Imm, int Funct3){
-  int effAddr = 0;
-  effAddr = CURRENT_STATE.REGS[Rs1] + SIGNEXT(Imm, 12);
-  int mask = 0x3;
-  int offset = effAddr & mask;
-  int allignAddr = effAddr & ~mask;
-  int wordReadData = mem_read_32(allignAddr);
-  int writeData = CURRENT_STATE.REGS[Rs2] & 0xFF;
-  writeData = writeData << 8 * offset;
-  // NEXT_STATE.REGS[Rd] = cur;
-  mem_write_32(effAddr, CURRENT_STATE.REGS[Rs2]);
+  int address = CURRENT_STATE.REGS[Rs1] + Imm;
+  uint32_t word = mem_read_32(address & ~0x3);
+  uint8_t byte = CURRENT_STATE.REGS[Rs2] & 0x000000FF;
+  if ((address & 0x3) == 0) {
+    word = (word & 0xFFFFFF00) | byte;
+  } else if ((address & 0x3) == 1) {
+    word = (word & 0xFFFF00FF) | (byte << 8);
+  } else if ((address & 0x3) == 2) {
+    word = (word & 0xFF00FFFF) | (byte << 16);
+  } else {
+    word = (word & 0x00FFFFFF) | byte << 24;
+  }
+  mem_write_32(address & ~0x3, word);
   return 0;
 }
 
 int SH (int Rs1, int Rs2, int Imm, int Funct3) {
-
+  int address = CURRENT_STATE.REGS[Rs1] + Imm;
+  uint32_t word = mem_read_32(address & ~0x2);
+  uint16_t halfword = CURRENT_STATE.REGS[Rs2] & 0x0000FFFF;
+  if (address & 0x2) {
+    word = (word & 0x0000FFFF) | (halfword << 16);
+  } else {
+    word = (word & 0xFFFF0000) | halfword;
+  }
+  mem_write_32(address & ~0x2, word);
   return 0;
-} // FIXME:
+} 
 
 int SW (int Rs1, int Rs2, int Imm, int Funct3) {
-
+  int address = CURRENT_STATE.REGS[Rs1] + Imm;
+  mem_write_32(address, CURRENT_STATE.REGS[Rs2]);
   return 0;
-} // FIXME:
+} 
+// S Instruction    S Instruction   S Instruction
 
-// R instruction    R instruction   R instruction
-// R instruction    R instruction   R instruction
-int SUB (int Rd, int Rs1, int Rs2, int Funct3) {
-  int cur = CURRENT_STATE.REGS[Rs1] - CURRENT_STATE.REGS[Rs2];
-  NEXT_STATE.REGS[Rd] = cur;
-  return 0;
-}
 
-int SLL (int Rd, int Rs1, int Rs2, int Funct3) {
-  int cur = CURRENT_STATE.REGS[Rs1] << CURRENT_STATE.REGS[Rs2];
-  NEXT_STATE.REGS[Rd] = cur;
-  return 0;
-}
 
-int SLT (int Rd, int Rs1, int Rs2, int Funct3) {
-  if (CURRENT_STATE.REGS[Rs1] < CURRENT_STATE.REGS[Rs2]) {
-      NEXT_STATE.REGS[Rd] = CURRENT_STATE.REGS[Rs1];
-  }else {
-      NEXT_STATE.REGS[Rd] = CURRENT_STATE.REGS[Rs2];
-  }
-  return 0;
-}
 
-int SLTU (int Rd, int Rs1, int Rs2, int Funct3) {
-  if (CURRENT_STATE.REGS[Rs1] < CURRENT_STATE.REGS[Rs2]){
-    NEXT_STATE.REGS[Rd] = CURRENT_STATE.REGS[Rs1];
-  }else {
-    NEXT_STATE.REGS[Rd] = CURRENT_STATE.REGS[Rs2];
-  }
-  return 0;
-}
-
-int XOR (int Rd, int Rs1, int Rs2, int Funct3) {
-  int cur = CURRENT_STATE.REGS[Rs1] ^ CURRENT_STATE.REGS[Rs2];
-  NEXT_STATE.REGS[Rd] = cur;
-  return 0;
-}
-
-int SRL (int Rd, int Rs1, int Rs2, int Funct3) {
-  int cur = CURRENT_STATE.REGS[Rs1] >> CURRENT_STATE.REGS[Rs2];
-  NEXT_STATE.REGS[Rd] = cur;
-  return 0;
-}
-
-int SRA (int Rd, int Rs1, int Rs2, int Funct3) {
-  int cur = CURRENT_STATE.REGS[Rs1] >>= CURRENT_STATE.REGS[Rs2];
-  NEXT_STATE.REGS[Rd] = cur;
-  return 0;
-}
-
-int OR (int Rd, int Rs1, int Rs2, int Funct3) {
-  int cur = CURRENT_STATE.REGS[Rs1] | CURRENT_STATE.REGS[Rs2];
-  NEXT_STATE.REGS[Rd] = cur;
-  return 0;
-}
-
-int AND (int Rd, int Rs1, int Rs2, int Funct3) {
-  int cur = CURRENT_STATE.REGS[Rs1] & CURRENT_STATE.REGS[Rs2];
-  NEXT_STATE.REGS[Rd] = cur;
-  return 0;
-}
-
-// B instructions   B instructions    B instructions
 // B instructions   B instructions    B instructions
 int BEQ (int Rs1, int Rs2, int Imm, int Funct3) {
   Imm = Imm << 1;
   if (CURRENT_STATE.REGS[Rs1] == CURRENT_STATE.REGS[Rs2])
     NEXT_STATE.PC = (CURRENT_STATE.PC - 4) + (SIGNEXT(Imm,13));
   return 0;
-} // FIXME:
+} 
+
+int BNE (int Rs1, int Rs2, int Imm, int Funct3) {
+  int cur = 0;
+  Imm = Imm << 1;
+  if (CURRENT_STATE.REGS[Rs1] != CURRENT_STATE.REGS[Rs2])
+    NEXT_STATE.PC = (CURRENT_STATE.PC - 4) + (SIGNEXT(Imm,12));
+  return 0;
+}
 
 int BLT (int Rs1, int Rs2, int Imm, int Funct3) {
   Imm = Imm << 1;
   if (CURRENT_STATE.REGS[Rs1] < CURRENT_STATE.REGS[Rs2])
     NEXT_STATE.PC = (CURRENT_STATE.PC - 4) + (SIGNEXT(Imm,13));
   return 0;
-} // FIXME:
+}
 
 int BGE (int Rs1, int Rs2, int Imm, int Funct3) {
   Imm = Imm << 1;
   if (CURRENT_STATE.REGS[Rs1] >= CURRENT_STATE.REGS[Rs2])
     NEXT_STATE.PC = (CURRENT_STATE.PC - 4) + (SIGNEXT(Imm,13));
   return 0;
-} // FIXME:
+} 
 
 int BLTU (int Rs1, int Rs2, int Imm, int Funct3) {
   Imm = Imm << 1;
   if (CURRENT_STATE.REGS[Rs1] < CURRENT_STATE.REGS[Rs2])
     NEXT_STATE.PC = (CURRENT_STATE.PC - 4) + (SIGNEXT(Imm,13));
   return 0;
-} // FIXME:
+} 
 
 int BGEU (int Rs1, int Rs2, int Imm, int Funct3) {
   Imm = Imm << 1;
   if (CURRENT_STATE.REGS[Rs1] >= CURRENT_STATE.REGS[Rs2])
     NEXT_STATE.PC = (CURRENT_STATE.PC - 4) + (SIGNEXT(Imm,13));
   return 0;
-} // FIXME:
+} 
+// B instructions   B instructions    B instructions
 
-// I instruction
+
+
+
+// I instruction I instruction I instruction
 int JALR (int Rd, int Rs1, int Imm) {
     NEXT_STATE.PC = CURRENT_STATE.REGS[Rs1] + (SIGNEXT(Imm,20));
-    CURRENT_STATE.REGS[Rd] = CURRENT_STATE.PC + 4;
+    NEXT_STATE.REGS[Rd] = CURRENT_STATE.PC + 4;
     return 0;
-} // FIXME:
+} 
+// I instruction I instruction I instruction
 
-// J instruction 
+
+
+
+// J instruction J instruction J instruction
 int JAL (int Rd, int imm) {
     NEXT_STATE.PC = (SIGNEXT(imm,20));
-    CURRENT_STATE.REGS[Rd] = CURRENT_STATE.PC + 4;
+    NEXT_STATE.REGS[Rd] = CURRENT_STATE.PC + 4;
     return 0;
-} // FIXME:
+} 
+// J instruction J instruction J instruction
 
+
+
+// ECALL
 int ECALL (char* i_){
   
   return 0;
-} // FIXME:
+} 
 
 #endif
