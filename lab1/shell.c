@@ -407,7 +407,6 @@ int main(int argc, char *argv[]) {
   }
 
   while (1)
-    printf("Getting New Command\n");
     get_command(dumpsim_file);
   
 
