@@ -46,54 +46,54 @@ int bchar_to_int(char* rsa) {
   int i = 0;
   int result = 0;
   int t = 0;
-  while(rsa[i] != '\0')i++;
-  while(i>0)
-    {
+  while(rsa[i] != '\0'){ i++; }
+  while(i>0){
       --i;
-      // printf("%d\n", (rsa[i]-'0')<<t);
       result += (rsa[i] - '0')<<t;
+      // printf("%d\n", result);
       t++;
     }
   return result;
 }
 
 int r_process(char* i_) {
+  char d_opcode[8]; d_opcode[7] = '\0'; // Opcode variable + null pointer
+  for (int i = 0; i < 7; i++) {         // 7 bits for opcode
+    d_opcode[i] = i_[31-6+i];           // assignment
+  }
 
-  char d_opcode[8];
-  d_opcode[0] = i_[31-6]; 
-  d_opcode[1] = i_[31-5]; 
-  d_opcode[2] = i_[31-4]; 
-  d_opcode[3] = i_[31-3];
-  d_opcode[4] = i_[31-2]; 
-  d_opcode[5] = i_[31-1]; 
-  d_opcode[6] = i_[31-0];
-  d_opcode[7] = '\0';
-  char rs1[6]; rs1[5] = '\0';		   
-  char rs2[6]; rs2[5] = '\0';
-  char rd[6]; rd[5] = '\0';
-  char funct3[4]; funct3[3] = '\0';
-  char funct7[8]; funct7[7] = '\0';
+  char rd[6]; rd[5] = '\0';             // Rd variable
   for(int i = 0; i < 5; i++) {
-    rs1[i] = i_[31-19+i];
-    rs2[i] = i_[31-24+i];            
-    rd[i] = i_[31-11+i];
+    rd[i] = i_[31-11+i];                // assigning bits 11-7 to 0-4
   }
-  for(int i = 0; i < 3; i++) {
-    funct3[i] = i_[31-14+i];
-  }
-  for(int i = 0; i < 7; i++){
-    funct7[i] = i_[25 + i];
-  }
-  int Rs1 = bchar_to_int(rs1);
-  int Rs2 = bchar_to_int(rs2);		   
-  int Rd = bchar_to_int(rd);
-  int Funct3 = bchar_to_int(funct3);
-  int Funct7 = bchar_to_int(funct7);
-  printf ("Opcode = %s\n Rs1 = %d\n Rs2 = %d\n Rd = %d\n Funct3 = %d\n\n",
-	  d_opcode, Rs1, Rs2, Rd, Funct3);
-  printf("\n");
+  int Rd = bchar_to_int(rd);            // convert rd to int
 
-  /* Example - use and replicate */
+  char funct3[4]; funct3[3] = '\0';     // Funct3 variable
+  for(int i = 0; i < 3; i++) {
+    funct3[i] = i_[31-14+i];            // assigning bits 14-12 to 0-2
+  }
+  int Funct3 = bchar_to_int(funct3);    // convert funct3 to int
+
+  char rs1[6]; rs1[5] = '\0';		        // Rs1 variable
+  for(int i = 0; i < 5; i++) {
+    rs1[i] = i_[31-19+i];               // assigning bits 19-15 to 0-4
+  }  
+  int Rs1 = bchar_to_int(rs1);          // convert rs1 to int
+
+  char rs2[6]; rs2[5] = '\0';           // Rs2 variable
+  for(int i = 0; i < 5; i++) {
+    rs2[i] = i_[31-24+i];               // assigning bits 24-20 to 0-4
+  }
+  int Rs2 = bchar_to_int(rs2);		      // convert rs2 to int
+
+  char funct7[8]; funct7[7] = '\0';     // Funct7 variable
+  for(int i = 0; i < 7; i++){
+    funct7[i] = i_[31-31+i];            // assigning bits 31-25 to 0-6
+  }
+  int Funct7 = bchar_to_int(funct7);    // convert funct7 to int
+  
+  printf ("Opcode = %s\n Rs1 = %d\n Rs2 = %d\n Rd = %d\n Funct3 = %d\n\n", d_opcode, Rs1, Rs2, Rd, Funct3);
+
   if(!strcmp(d_opcode,"0110011")) {
     ADD(Rd, Rs1, Rs2, Funct3);
     switch(Funct3){
@@ -123,47 +123,41 @@ int r_process(char* i_) {
         break;
     }
   }
-  /* Add other data instructions here */ 
-
   return 1;	
 }
 
 int i_process(char* i_) {
+  char d_opcode[8]; d_opcode[7] = '\0'; // Opcode variable + null pointer
+  for (int i = 0; i < 7; i++) {         // 7 bits for opcode
+    d_opcode[i] = i_[31-6+i];           // assignment
+  }
 
-  char d_opcode[8];
-  d_opcode[0] = i_[31-6]; 
-  d_opcode[1] = i_[31-5]; 
-  d_opcode[2] = i_[31-4]; 
-  d_opcode[3] = i_[31-3];
-  d_opcode[4] = i_[31-2]; 
-  d_opcode[5] = i_[31-1]; 
-  d_opcode[6] = i_[31-0]; 
-  d_opcode[7] = '\0';
-  char rs1[6]; rs1[5] = '\0';		   
-  char rd[6]; rd[5] = '\0';
-  char funct3[4]; funct3[3] = '\0';
-  char imm[13]; imm[12] = '\0';
-  for(int i = 0; i < 5; i++) {
-    rs1[i] = i_[31-19+i];
-    rd[i] = i_[31-11+i];
+  char rd[6]; rd[5] = '\0';             // Rd variable
+  for (int i = 0; i < 5; i++) {
+    rd[i] = i_[31-11+i];                // assigning bits 11-7 to 0-4
   }
-  for(int i = 0; i < 12; i++) {
-    imm[i] = i_[31-31+i];
-  }
+  int Rd = bchar_to_int(rd);            // convert rd to int
+
+  char funct3[4]; funct3[3] = '\0';     // Funct3 variable
   for(int i = 0; i < 3; i++) {
-    funct3[i] = i_[31-14+i];
+    funct3[i] = i_[31-14+i];            // assigning bits 14-12 to 0-2
   }
-  int Rs1 = bchar_to_int(rs1);
-  int Rd = bchar_to_int(rd);
-  int Funct3 = bchar_to_int(funct3);
-  int Imm = bchar_to_int(imm);
-  printf ("Opcode = %s\n Rs1 = %d\n Imm = %d\n Rd = %d\n Funct3 = %d\n\n",
-	  d_opcode, Rs1, Imm, Rd, Funct3);
-  printf("\n");
+  int Funct3 = bchar_to_int(funct3);    // convert funct3 to int
 
-  /* Add other imm instructions here */ 
+  char rs1[6]; rs1[5] = '\0';           // Rs1 variable
+  for (int i = 0; i < 5; i++) {
+    rs1[i] = i_[31-19+i];               // assigning bits 19-15 to 0-4
+  }
+  int Rs1 = bchar_to_int(rs1);          // convert rs1 to int
 
-  /* This is an Add Immediate Instruciton */
+  char imm[13]; imm[12] = '\0';         // Imm variable
+  for(int i = 0; i < 12; i++) {
+    imm[i] = i_[31-31+i];               // assigning bits 31-20 to 0-11
+  }
+  int Imm = bchar_to_int(imm);          // convert imm to int
+
+  printf ("Opcode = %s\n Rs1 = %d\n Imm = %d\n Rd = %d\n Funct3 = %d\n\n", d_opcode, Rs1, Imm, Rd, Funct3);
+
   if(!strcmp(d_opcode,"0000011")) {
     switch(Funct3){
       case 0x0:
@@ -214,60 +208,48 @@ int i_process(char* i_) {
   } else if (!strcmp(d_opcode, "1100111")) {
     JALR  (Rd, Rs1, Imm);
   }
-
   return 1;	
 }
 
+// This function execute B type instruction 
 int b_process(char* i_) {
+  char d_opcode[8]; d_opcode[7] = '\0'; // Opcode variable + null pointer
+  for (int i = 0; i < 7; i++) {         // 7 bits for opcode
+    d_opcode[i] = i_[31-6+i];           // assignment
+  }
   
-  /* This function execute branch instruction */
-
-  char d_opcode[8];
-  d_opcode[0] = i_[31-6]; 
-  d_opcode[1] = i_[31-5]; 
-  d_opcode[2] = i_[31-4]; 
-  d_opcode[3] = i_[31-3];
-  d_opcode[4] = i_[31-2]; 
-  d_opcode[5] = i_[31-1]; 
-  d_opcode[6] = i_[31-0]; 
-  d_opcode[7] = '\0';
-  char rs1[6]; rs1[5] = '\0';
-  char rs2[6]; rs2[5] = '\0';		     
-  char funct3[4]; funct3[3] = '\0';
-  char imm[13]; 
-  for(int i = 0; i < 5; i++) {
-    rs1[i] = i_[31-19+i];
-    rs2[i] = i_[31-24+i];                
-  }
-  // Old-fashioned method but works :)
-  imm[0] = i_[31-31]; 
-  imm[1] = i_[31-7]; 
-  imm[2] = i_[31-30]; 
-  imm[3] = i_[31-29];
-  imm[4] = i_[31-28]; 
-  imm[5] = i_[31-27]; 
-  imm[6] = i_[31-26];
-  imm[7] = i_[31-25];
-  imm[8] = i_[31-11];
-  imm[9] = i_[31-10];
-  imm[10] = i_[31-9];
-  imm[11] = i_[31-8];
-  imm[12] = '\0';  
-
+  char funct3[4]; funct3[3] = '\0';     // Funct3 variable
   for(int i = 0; i < 3; i++) {
-    funct3[i] = i_[31-14+i];
+    funct3[i] = i_[31-14+i];            // assigning bits 14-12 to 0-2
   }
-  int Rs1 = bchar_to_int(rs1);
-  int Rs2 = bchar_to_int(rs2);  
-  int Funct3 = bchar_to_int(funct3);
-  int Imm = bchar_to_int(imm);
-  printf ("Opcode = %s\n Rs1 = %d\n Rs2 = %d\n Imm = %d\n Funct3 = %d\n\n",
-	  d_opcode, Rs1, Rs2, Imm, Funct3);
-  printf("\n");    
+  int Funct3 = bchar_to_int(funct3);    // convert funct3 to int
 
-  /* Add branch instructions here */
+  char rs1[6]; rs1[5] = '\0';           // Rs1 variable
+  for(int i = 0; i < 5; i++) {
+    rs1[i] = i_[31-19+i];               // assigning bits 19-15 to 0-4
+  }
+  int Rs1 = bchar_to_int(rs1);          // convert rs1 to int
 
-  /* This is an Add Immediate Instruciton */
+  char rs2[6]; rs2[5] = '\0';		        // Rs2 variable
+  for(int i = 0; i < 5; i++) {
+    rs2[i] = i_[31-24+i];               // assigning bits 24-20 to 0-4
+  }
+  int Rs2 = bchar_to_int(rs2);          // convert rs2 to int   
+
+  char imm[14]; imm[13] = '\0';         // Imm variable
+  imm[12] = '0';                        // Assign trailing 0
+  imm[0] = i_[31-31];                   // Assign bit 31 to 0
+  for (int i = 0; i < 6; i++) {         
+    imm[2+i] = i_[31-30+i];             // Assigning bits 30-25 to 2-7
+  } 
+  for (int i = 0; i < 4; i++) {
+    imm[8+i] = i_[31-11+i];             // Assigning bits 11-8 to 8-11
+  }
+  imm[1] = i_[31-7];                    // Assign bit 7 to 1
+  int Imm = bchar_to_int(imm);          // convert imm to int
+
+  printf("Opcode = %s\n Rs1 = %d\n Rs2 = %d\n Imm = %d\n Funct3 = %d\n\n", d_opcode, Rs1, Rs2, Imm, Funct3);
+
   if(!strcmp(d_opcode,"1100011")) {
     switch(Funct3){
       case 0x0:
@@ -290,55 +272,44 @@ int b_process(char* i_) {
         break;
     }
   }	    
-
   return 1;
 }
 
+// This function executes S type instructions
 int s_process(char* i_) {
-
-  char d_opcode[8];
-  d_opcode[0] = i_[31-6]; 
-  d_opcode[1] = i_[31-5]; 
-  d_opcode[2] = i_[31-4]; 
-  d_opcode[3] = i_[31-3];
-  d_opcode[4] = i_[31-2]; 
-  d_opcode[5] = i_[31-1]; 
-  d_opcode[6] = i_[31-0]; 
-  d_opcode[7] = '\0';
-  char rs1[6]; rs1[5] = '\0';
-  char rs2[6]; rs2[5] = '\0';		     
-  char funct3[4]; funct3[3] = '\0';
-  char imm[13]; 
-  for(int i = 0; i < 5; i++) {
-    rs1[i] = i_[31-19+i];
-    rs2[i] = i_[31-24+i];                
+  char d_opcode[8]; d_opcode[7] = '\0'; // Opcode variable + null pointer
+  for (int i = 0; i < 7; i++) {         // 7 bits for opcode
+    d_opcode[i] = i_[31-6+i];           // assignment
   }
-  // Old-fashioned method but works :)
-  imm[0] = i_[31-7]; 
-  imm[1] = i_[31-8]; 
-  imm[2] = i_[31-9]; 
-  imm[3] = i_[31-10];
-  imm[4] = i_[31-11];
 
-  imm[5] = i_[31-25]; 
-  imm[6] = i_[31-26];
-  imm[7] = i_[31-27];
-  imm[8] = i_[31-28];
-  imm[9] = i_[31-29];
-  imm[10] = i_[31-20];
-  imm[11] = i_[31-31];
-  imm[12] = '\0';  
-
+  char funct3[4]; funct3[3] = '\0';     // Funct3 variable
   for(int i = 0; i < 3; i++) {
-    funct3[i] = i_[31-14+i];
+    funct3[i] = i_[31-14+i];            // assigning bits 14-12 to 0-2
   }
-  int Rs1 = bchar_to_int(rs1);
-  int Rs2 = bchar_to_int(rs2);  
-  int Funct3 = bchar_to_int(funct3);
-  int Imm = bchar_to_int(imm);
-  printf ("Opcode = %s\n Rs1 = %d\n Rs2 = %d\n Imm = %d\n Funct3 = %d\n\n",
-	  d_opcode, Rs1, Rs2, Imm, Funct3);
-  printf("\n");   
+  int Funct3 = bchar_to_int(funct3);    // convert funct3 to int
+
+  char rs1[6]; rs1[5] = '\0';           // Rs1 variable
+  for(int i = 0; i < 5; i++) {
+    rs1[i] = i_[31-19+i];               // assigning bits 19-15 to 0-4
+  }
+  int Rs1 = bchar_to_int(rs1);          // convert rs1 to int
+
+  char rs2[6]; rs2[5] = '\0';		        // Rs2 variable
+  for(int i = 0; i < 5; i++) {
+    rs2[i] = i_[31-24+i];               // assigning bits 24-20 to 0-4
+  }
+  int Rs2 = bchar_to_int(rs2);          // convert rs2 to int
+
+  char imm[13]; imm[12] = '\0';         // Imm variable
+  for (int i = 0; i < 5; i++) {  
+    imm[7+i] = i_[31-11+i];             // assigning bits 11-7 to 7-11
+  }
+  for (int i = 0; i < 7; i++) {  
+    imm[i] = i_[31-31+i];               // assigning bits 31-25 to 0-6
+  }
+  int Imm = bchar_to_int(imm);          // convert imm to int
+  
+  printf("Opcode = %s\n Rs1 = %d\n Rs2 = %d\n Imm = %d\n Funct3 = %d\n\n", d_opcode, Rs1, Rs2, Imm, Funct3);
 
   if(!strcmp(d_opcode,"0100011")) {
     switch(Funct3){
@@ -353,207 +324,146 @@ int s_process(char* i_) {
         break;
     }
   }	    
-
   return 1;
 }
 
+// This function executes J type instructions
 int j_process(char* i_) {
-
-  /* This function execute Jump instructions */
-
-  char d_opcode[8];
-  d_opcode[0] = i_[31-6]; 
-  d_opcode[1] = i_[31-5]; 
-  d_opcode[2] = i_[31-4]; 
-  d_opcode[3] = i_[31-3];
-  d_opcode[4] = i_[31-2]; 
-  d_opcode[5] = i_[31-1]; 
-  d_opcode[6] = i_[31-0]; 
-  d_opcode[7] = '\0';
+  char d_opcode[8]; d_opcode[7] = '\0'; // Opcode variable + null pointer
+  for (int i = 0; i < 7; i++) {         // 7 bits for opcode
+    d_opcode[i] = i_[31-6+i];           // assignment
+  }
    
-  char rd[6]; rd[5] = '\0';
-  char imm[21]; imm[20] = '\0';
-  for(int i = 0; i < 5; i++) {
+  char rd[6]; rd[5] = '\0';             // Rd variable
+  for(int i = 0; i < 5; i++) {          // Assigning bits to rd
     rd[i] = i_[31-11+i];
   }
+  int Rd = bchar_to_int(rd);            // Convert rd to int
 
-  imm[0] = i_[31-12-1]; 
-  imm[1] = i_[31-12-2]; 
-  imm[2] = i_[31-12-3]; 
-  imm[3] = i_[31-12-4];
-  imm[4] = i_[31-12-5];
-  imm[5] = i_[31-12-6]; 
-  imm[6] = i_[31-12-7];
-  imm[7] = i_[31-12-8];
-  imm[8] = i_[31-12-9];
-  imm[9] = i_[31-12-10];
+  char imm[22]; imm[21] = '\0';         // Imm variable
+  imm[20] = '0';                        // Assign trailing 0
+  imm[0] = i_[31-12-20+1];              // Assign bit 31 to 0
+  for (int i = 0; i < 10; i++) {        
+    imm[10+i] = i_[31-12-19+1+i];       // Assigning bits 30-21 to 10-19
+  }
+  imm[9] = i_[31-12-9+1];               // Assign bit 20 to 9
+  for (int i = 0; i < 8; i++) {         
+    imm[1+i] = i_[31-12-8+i];           // Assigning bits 19-12 to 1-8
+  }
+  int Imm = bchar_to_int(imm);          // Convert imm to int
 
-  imm[10] = i_[31-12-11];
-
-  imm[12] = i_[31-12-12]; 
-  imm[13] = i_[31-12-13];
-  imm[14] = i_[31-12-14];
-  imm[15] = i_[31-12-15];
-  imm[16] = i_[31-12-16];
-  imm[17] = i_[31-12-17];
-  imm[18] = i_[31-12-18];
-  imm[19] = i_[31-12-19];
-
- 
-  int Rd = bchar_to_int(rd);
-  int Imm = bchar_to_int(imm);
-
-  printf ("Opcode = %s\n Imm = %d\n Rd = %d\n\n",
-	  d_opcode, Imm, Rd);
+  printf ("Opcode = %s\n Imm = %d\n Rd = %d\n\n", d_opcode, Imm, Rd);
 
   if(!strcmp(d_opcode,"1101111")) {
     JAL(Rd, Imm);
   }
-
   return 1;
 }
 
+// This function executes U type instructions
 int u_process(char* i_) {
-
-  /* This function execute U type instructions */
-
-  char d_opcode[8];
-  d_opcode[0] = i_[31-6]; 
-  d_opcode[1] = i_[31-5]; 
-  d_opcode[2] = i_[31-4]; 
-  d_opcode[3] = i_[31-3];
-  d_opcode[4] = i_[31-2]; 
-  d_opcode[5] = i_[31-1]; 
-  d_opcode[6] = i_[31-0]; 
-  d_opcode[7] = '\0';
+  char d_opcode[8]; d_opcode[7] = '\0'; // Opcode variable + null pointer
+  for (int i = 0; i < 7; i++) {         // 7 bits for opcode
+    d_opcode[i] = i_[31-6+i];           // assignment
+  } 
    
-  char rd[6]; rd[5] = '\0';
-  char imm[21]; imm[20] = '\0';
-  for(int i = 0; i < 5; i++) {
+  char rd[6]; rd[5] = '\0';             // Rd variable
+  for(int i = 0; i < 5; i++) {          // Assigning bits to rd
     rd[i] = i_[31-11+i];
   }
+  int Rd = bchar_to_int(rd);            // Convert rd to int
 
-  imm[0] = i_[31-12-1]; 
-  imm[1] = i_[31-12-2]; 
-  imm[2] = i_[31-12-3]; 
-  imm[3] = i_[31-12-4];
-  imm[4] = i_[31-12-5];
-  imm[5] = i_[31-12-6]; 
-  imm[6] = i_[31-12-7];
-  imm[7] = i_[31-12-8];
-  imm[8] = i_[31-12-9];
-  imm[9] = i_[31-12-10];
-
-  imm[10] = i_[31-12-11];
-
-  imm[12] = i_[31-12-12]; 
-  imm[13] = i_[31-12-13];
-  imm[14] = i_[31-12-14];
-  imm[15] = i_[31-12-15];
-  imm[16] = i_[31-12-16];
-  imm[17] = i_[31-12-17];
-  imm[18] = i_[31-12-18];
-  imm[19] = i_[31-12-19];
-
- 
-  int Rd = bchar_to_int(rd);
-  int Imm = bchar_to_int(imm);
-
-  printf ("Opcode = %s\n Imm = %d\n Rd = %d\n\n",
-	  d_opcode, Imm, Rd);
-
+  char imm[33]; imm[32] = '\0';         // Imm variable
+  for (int i = 0; i < 20; i++) {        // Assigning bits to imm
+    imm[i] = i_[i];
+  }
+  for (int i = 0; i < 12; i++) {        // Assigning trailing 0s to imm
+    imm[31 - 11 + i] = '0';
+  }
+  int Imm = bchar_to_int(imm);          // Convert imm to int
+  
+  printf ("Opcode = %s\n Imm = %d\n Rd = %d\n\n", d_opcode, Imm, Rd);
+  
   if(!strcmp(d_opcode,"0010111")) {
     AUIPC(Rd, Imm);
   } else if (!strcmp(d_opcode,"0110111")) {
     LUI(Rd, Imm);
   }
-
   return 1;
 }
 
 int interruption_process(char* i_) {
-
   ECALL(i_);
   RUN_BIT = 0;
   return 0;
 }
 
+// This function decode the instruction and update 
+// CPU_State (NEXT_STATE)
 int decode_and_execute(char* i_) {
-
-  /* 
-     This function decode the instruction and update 
-     CPU_State (NEXT_STATE)
-  */
-
-  if((i_[25] == '0') && (i_[26] == '0') &&
+  if(((i_[25] == '0') && (i_[26] == '0') &&
      (i_[27] == '1') && (i_[28] == '0') &&
-     (i_[29] == '0') && (i_[30] == '1') && (i_[31] == '1')) {
-    printf("- This is an Immediate Type Instruction. \n");
+     (i_[29] == '0') && (i_[30] == '1') && 
+     (i_[31] == '1')) || ((i_[25] == '1') &&
+     (i_[26] == '1') && (i_[27] == '0') &&
+     (i_[28] == '0') && (i_[29] == '1') &&
+     (i_[30] == '1') && (i_[31] == '1'))) {
+    printf("- This is an I Type Instruction. \n");
     i_process(i_);
-  }
-  if((i_[25] == '0') && (i_[26] == '1') &&
+  } else if((i_[25] == '0') && (i_[26] == '1') &&
      (i_[27] == '1') && (i_[28] == '0') &&
      (i_[29] == '0') && (i_[30] == '1') && (i_[31] == '1')) {
     printf("- This is an R Type Instruction. \n");
     r_process(i_);
-  }    
-  if((i_[25] == '1') && (i_[26] == '1') &&
+  } else if((i_[25] == '1') && (i_[26] == '1') &&
      (i_[27] == '0') && (i_[28] == '0') &&
      (i_[29] == '0') && (i_[30] == '1') && (i_[31] == '1')) {
     printf("- This is a B Type Instruction. \n");
     b_process(i_);
-  }
-  if((i_[25] == '0') && (i_[26] == '1') &&
+  } else if((i_[25] == '0') && (i_[26] == '1') &&
      (i_[27] == '0') && (i_[28] == '0') &&
      (i_[29] == '0') && (i_[30] == '1') && (i_[31] == '1')) {
     printf("- This is a S Type Instruction. \n");
     s_process(i_);
-  }  
-  if((i_[25] == '1') && (i_[26] == '1') &&
+  } else if((i_[25] == '1') && (i_[26] == '1') &&
      (i_[27] == '0') && (i_[28] == '1') &&
      (i_[29] == '1') && (i_[30] == '1') && (i_[31] == '1')) {
     printf("- This is a J Type Instruction. \n");
     j_process(i_);
-  }
-  if((i_[25] == '0') && (i_[26] == '0') &&
+  } else if(((i_[25] == '0') && (i_[26] == '0') &&
      (i_[27] == '1') && (i_[28] == '0') &&
-     (i_[29] == '1') && (i_[30] == '1') && (i_[31] == '1')) {
+     (i_[29] == '1') && (i_[30] == '1') && 
+     (i_[31] == '1')) || ((i_[25] == '0') && 
+     (i_[26] == '1') && (i_[27] == '1') &&
+     (i_[28] == '0') && (i_[29] == '1') &&
+     (i_[30] == '1') && (i_[31] == '1'))){
     printf("- This is a U Type Instruction. \n");
     u_process(i_);
-  }  
-  if((i_[25] == '1') && (i_[26] == '1') &&
+  } else if((i_[25] == '1') && (i_[26] == '1') &&
      (i_[27] == '1') && (i_[28] == '0') &&
      (i_[29] == '0') && (i_[30] == '1') && (i_[31] == '1')) {
     printf("- This is a Software Interruption Instruction. \n");
     interruption_process(i_);
+  } else {
+    printf("- This is an Invalid Instruction. \n");
+    printf("Opcode = %s\n", OPCODE(i_));
   }
-
   return 0;
-
 }
 
-unsigned int OPCODE (unsigned int i_word) {
+unsigned int OPCODE (unsigned int i_word) { return ((i_word<<27)>>27); }
 
-  return ((i_word<<27)>>27);
-
-}
-
+// execute one instruction here. You should use CURRENT_STATE and modify
+// values in NEXT_STATE. You can call mem_read_32() and mem_write_32() to
+// access memory.
 void process_instruction() {
-
-  /* 
-     execute one instruction here. You should use CURRENT_STATE and modify
-     values in NEXT_STATE. You can call mem_read_32() and mem_write_32() to
-     access memory. 
-  */   
-
   unsigned int inst_word = mem_read_32(CURRENT_STATE.PC);
+  char *inst = byte_to_binary32(inst_word);
   printf("The instruction is: %x \n", inst_word);
-  printf("33222222222211111111110000000000\n");
-  printf("10987654321098765432109876543210\n");
-  printf("--------------------------------\n");
-  printf("%s \n", byte_to_binary32(inst_word));
+  // printf("33222222222211111111110000000000\n");  // What is the point of these
+  // printf("10987654321098765432109876543210\n");  // lines of code?
+  printf("---------------------------------------------------\n");
+  printf("%s \n", inst_word);
   printf("\n");
-  decode_and_execute(byte_to_binary32(inst_word));
-
-  NEXT_STATE.PC += 4;
+  decode_and_execute(inst);
 }
