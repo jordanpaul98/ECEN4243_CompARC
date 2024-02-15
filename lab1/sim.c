@@ -446,7 +446,7 @@ int decode_and_execute(char* i_) {
     interruption_process(i_);
   } else {
     printf("- This is an Invalid Instruction. \n");
-    printf("Opcode = %s\n", OPCODE(i_));
+    printf("Opcode = %s\n", i_);
   }
   return 0;
 }
