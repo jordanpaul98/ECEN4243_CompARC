@@ -25,27 +25,31 @@ int ADD (int Rd, int Rs1, int Rs2, int Funct3) {
   int cur = 0;
   cur = CURRENT_STATE.REGS[Rs1] + CURRENT_STATE.REGS[Rs2];
   NEXT_STATE.REGS[Rd] = cur;
+  NEXT_STATE.PC = CURRENT_STATE.PC + 4;
   return 0;
 }
 
 int SUB (int Rd, int Rs1, int Rs2, int Funct3) {
   int cur = CURRENT_STATE.REGS[Rs1] - CURRENT_STATE.REGS[Rs2];
   NEXT_STATE.REGS[Rd] = cur;
+  NEXT_STATE.PC = CURRENT_STATE.PC + 4;
   return 0;
 }
 
 int SLL (int Rd, int Rs1, int Rs2, int Funct3) {
   int cur = CURRENT_STATE.REGS[Rs1] << CURRENT_STATE.REGS[Rs2];
   NEXT_STATE.REGS[Rd] = cur;
+  NEXT_STATE.PC = CURRENT_STATE.PC + 4;
   return 0;
 }
 
 int SLT (int Rd, int Rs1, int Rs2, int Funct3) {
   if (CURRENT_STATE.REGS[Rs1] < CURRENT_STATE.REGS[Rs2]) {
-      NEXT_STATE.REGS[Rd] = CURRENT_STATE.REGS[Rs1];
+    NEXT_STATE.REGS[Rd] = CURRENT_STATE.REGS[Rs1];
   }else {
-      NEXT_STATE.REGS[Rd] = CURRENT_STATE.REGS[Rs2];
+    NEXT_STATE.REGS[Rd] = CURRENT_STATE.REGS[Rs2];
   }
+  NEXT_STATE.PC = CURRENT_STATE.PC + 4;
   return 0;
 }
 
@@ -55,36 +59,42 @@ int SLTU (int Rd, int Rs1, int Rs2, int Funct3) {
   }else {
     NEXT_STATE.REGS[Rd] = CURRENT_STATE.REGS[Rs2];
   }
+  NEXT_STATE.PC = CURRENT_STATE.PC + 4;
   return 0;
 }
 
 int XOR (int Rd, int Rs1, int Rs2, int Funct3) {
   int cur = CURRENT_STATE.REGS[Rs1] ^ CURRENT_STATE.REGS[Rs2];
   NEXT_STATE.REGS[Rd] = cur;
+  NEXT_STATE.PC = CURRENT_STATE.PC + 4;
   return 0;
 }
 
 int SRL (int Rd, int Rs1, int Rs2, int Funct3) {
   int cur = CURRENT_STATE.REGS[Rs1] >> CURRENT_STATE.REGS[Rs2];
   NEXT_STATE.REGS[Rd] = cur;
+  NEXT_STATE.PC = CURRENT_STATE.PC + 4;
   return 0;
 }
 
 int SRA (int Rd, int Rs1, int Rs2, int Funct3) {
   int cur = CURRENT_STATE.REGS[Rs1] >>= CURRENT_STATE.REGS[Rs2];
   NEXT_STATE.REGS[Rd] = cur;
+  NEXT_STATE.PC = CURRENT_STATE.PC + 4;
   return 0;
 }
 
 int OR (int Rd, int Rs1, int Rs2, int Funct3) {
   int cur = CURRENT_STATE.REGS[Rs1] | CURRENT_STATE.REGS[Rs2];
   NEXT_STATE.REGS[Rd] = cur;
+  NEXT_STATE.PC = CURRENT_STATE.PC + 4;
   return 0;
 }
 
 int AND (int Rd, int Rs1, int Rs2, int Funct3) {
   int cur = CURRENT_STATE.REGS[Rs1] & CURRENT_STATE.REGS[Rs2];
   NEXT_STATE.REGS[Rd] = cur;
+  NEXT_STATE.PC = CURRENT_STATE.PC + 4;
   return 0;
 }
 // R instruction    R instruction   R instruction
@@ -97,6 +107,7 @@ int ADDI (int Rd, int Rs1, int Imm, int Funct3) {
   int cur = 0;
   cur = CURRENT_STATE.REGS[Rs1] + SIGNEXT(Imm,12);
   NEXT_STATE.REGS[Rd] = cur;
+  NEXT_STATE.PC = CURRENT_STATE.PC + 4;
   return 0;
 }
 
@@ -114,6 +125,7 @@ int LB (int Rd, int Rs1, int Imm, int Funct3){
     byte = (word >> 24) & 0xFF;
   }
   NEXT_STATE.REGS[Rd] = SIGNEXT(byte, 7);
+  NEXT_STATE.PC = CURRENT_STATE.PC + 4;
   return 0;
 }
 
@@ -127,6 +139,7 @@ int LH (int Rd, int Rs1, int Imm, int Funct3){
     halfword = word & 0xffff;
   }
   NEXT_STATE.REGS[Rd] = SIGNEXT(halfword, 15);
+  NEXT_STATE.PC = CURRENT_STATE.PC + 4;
   return 0;
 }
 
@@ -134,66 +147,77 @@ int LW (int Rd, int Rs1, int Imm, int Funct3){
   uint32_t address = CURRENT_STATE.REGS[Rs1] + Imm;
   uint32_t word = mem_read_32(address);
   NEXT_STATE.REGS[Rd] = word;
+  NEXT_STATE.PC = CURRENT_STATE.PC + 4;
   return 0;
 }
 
 int LBU (int Rd, int Rs1, int Imm, int Funct3){
   int cur = CURRENT_STATE.REGS[Rs1] & 0x7f;
   NEXT_STATE.REGS[Rd] = cur;
+  NEXT_STATE.PC = CURRENT_STATE.PC + 4;
   return 0;
 }
 
 int LHU (int Rd, int Rs1, int Imm, int Funct3){
   int cur = CURRENT_STATE.REGS[Rs1] & 0x7fff;
   NEXT_STATE.REGS[Rd] = cur;
+  NEXT_STATE.PC = CURRENT_STATE.PC + 4;
   return 0;
 }
 
 int SLLI (int Rd, int Rs1, int Imm, int Funct3){
   int cur = CURRENT_STATE.REGS[Rs1] << Imm & 0x7fffffff;
   NEXT_STATE.REGS[Rd] = cur;
+  NEXT_STATE.PC = CURRENT_STATE.PC + 4;
   return 0;
 }
 
 int SLTI (int Rd, int Rs1, int Imm, int Funct3){
   int cur = (CURRENT_STATE.REGS[Rs1] < SIGNEXT(Imm, 12));
   NEXT_STATE.REGS[Rd] = cur;
+  NEXT_STATE.PC = CURRENT_STATE.PC + 4;
   return 0;
 }
 
 int SLTIU (int Rd, int Rs1, int Imm, int Funct3){
   int cur = (CURRENT_STATE.REGS[Rs1] < SIGNEXT(Imm, 12));
   NEXT_STATE.REGS[Rd] = cur;
+  NEXT_STATE.PC = CURRENT_STATE.PC + 4;
   return 0;
 }
 
 int XORI (int Rd, int Rs1, int Imm, int Funct3){
   int cur = (CURRENT_STATE.REGS[Rs1] ^ SIGNEXT(Imm, 12));
   NEXT_STATE.REGS[Rd] = cur;
+  NEXT_STATE.PC = CURRENT_STATE.PC + 4;
   return 0;
 }
 
 int SRLI (int Rd, int Rs1, int Imm, int Funct3){
   int cur = CURRENT_STATE.REGS[Rs1] >> Imm & 0x7fffffff;
   NEXT_STATE.REGS[Rd] = cur;
+  NEXT_STATE.PC = CURRENT_STATE.PC + 4;
   return 0;
 }
 
 int SRAI (int Rd, int Rs1, int Imm, int Funct3){
   int cur = CURRENT_STATE.REGS[Rs1] >>= Imm & 0x7fffffff;
   NEXT_STATE.REGS[Rd] = cur;
+  NEXT_STATE.PC = CURRENT_STATE.PC + 4;
   return 0;
 }
 
 int ORI (int Rd, int Rs1, int Imm, int Funct3){
   int cur = CURRENT_STATE.REGS[Rs1] | SIGNEXT(Imm, 12);
   NEXT_STATE.REGS[Rd] = cur;
+  NEXT_STATE.PC = CURRENT_STATE.PC + 4;
   return 0;
 }
 
 int ANDI (int Rd, int Rs1, int Imm, int Funct3){
   int cur = CURRENT_STATE.REGS[Rs1] & SIGNEXT(Imm, 12);
   NEXT_STATE.REGS[Rd] = cur;
+  NEXT_STATE.PC = CURRENT_STATE.PC + 4;
   return 0;
 }
 // I Instructions   I Instructions    I Instructions
@@ -203,12 +227,14 @@ int ANDI (int Rd, int Rs1, int Imm, int Funct3){
 
 // U Instruction    U Instruction   U Instruction
 int AUIPC (int Rd, int Imm) {
-  NEXT_STATE.REGS[Rd] = CURRENT_STATE.PC + (Imm << 12);
+  NEXT_STATE.REGS[Rd] = CURRENT_STATE.PC + Imm;
+  NEXT_STATE.PC = CURRENT_STATE.PC + 4;
   return 0;
 }
 
 int LUI (int Rd, int Imm) {
-  NEXT_STATE.REGS[Rd] = Imm << 12;
+  NEXT_STATE.REGS[Rd] = Imm;
+  NEXT_STATE.PC = CURRENT_STATE.PC + 4;
   return 0;
 }
 // U Instruction    U Instruction   U Instruction
@@ -231,6 +257,7 @@ int SB (int Rs1, int Rs2, int Imm, int Funct3){
     word = (word & 0x00FFFFFF) | byte << 24;
   }
   mem_write_32(address & ~0x3, word);
+  NEXT_STATE.PC = CURRENT_STATE.PC + 4;
   return 0;
 }
 
@@ -244,12 +271,15 @@ int SH (int Rs1, int Rs2, int Imm, int Funct3) {
     word = (word & 0xFFFF0000) | halfword;
   }
   mem_write_32(address & ~0x2, word);
+  NEXT_STATE.PC = CURRENT_STATE.PC + 4;
+
   return 0;
 } 
 
 int SW (int Rs1, int Rs2, int Imm, int Funct3) {
   uint32_t address = CURRENT_STATE.REGS[Rs1] + Imm;
   mem_write_32(address, CURRENT_STATE.REGS[Rs2]);
+  NEXT_STATE.PC = CURRENT_STATE.PC + 4;
   return 0;
 } 
 // S Instruction    S Instruction   S Instruction
@@ -261,7 +291,7 @@ int SW (int Rs1, int Rs2, int Imm, int Funct3) {
 int BEQ (int Rs1, int Rs2, int Imm, int Funct3) {
   Imm = Imm << 1;
   if (CURRENT_STATE.REGS[Rs1] == CURRENT_STATE.REGS[Rs2])
-    NEXT_STATE.PC = (CURRENT_STATE.PC - 4) + (SIGNEXT(Imm,13));
+    NEXT_STATE.PC = (CURRENT_STATE.PC) + (SIGNEXT(Imm,13));
   return 0;
 } 
 
@@ -269,35 +299,35 @@ int BNE (int Rs1, int Rs2, int Imm, int Funct3) {
   int cur = 0;
   Imm = Imm << 1;
   if (CURRENT_STATE.REGS[Rs1] != CURRENT_STATE.REGS[Rs2])
-    NEXT_STATE.PC = (CURRENT_STATE.PC - 4) + (SIGNEXT(Imm,12));
+    NEXT_STATE.PC = (CURRENT_STATE.PC) + (SIGNEXT(Imm,12));
   return 0;
 }
 
 int BLT (int Rs1, int Rs2, int Imm, int Funct3) {
   Imm = Imm << 1;
   if (CURRENT_STATE.REGS[Rs1] < CURRENT_STATE.REGS[Rs2])
-    NEXT_STATE.PC = (CURRENT_STATE.PC - 4) + (SIGNEXT(Imm,13));
+    NEXT_STATE.PC = (CURRENT_STATE.PC) + (SIGNEXT(Imm,13));
   return 0;
 }
 
 int BGE (int Rs1, int Rs2, int Imm, int Funct3) {
   Imm = Imm << 1;
   if (CURRENT_STATE.REGS[Rs1] >= CURRENT_STATE.REGS[Rs2])
-    NEXT_STATE.PC = (CURRENT_STATE.PC - 4) + (SIGNEXT(Imm,13));
+    NEXT_STATE.PC = (CURRENT_STATE.PC) + (SIGNEXT(Imm,13));
   return 0;
 } 
 
 int BLTU (int Rs1, int Rs2, int Imm, int Funct3) {
   Imm = Imm << 1;
   if (CURRENT_STATE.REGS[Rs1] < CURRENT_STATE.REGS[Rs2])
-    NEXT_STATE.PC = (CURRENT_STATE.PC - 4) + (SIGNEXT(Imm,13));
+    NEXT_STATE.PC = (CURRENT_STATE.PC) + (SIGNEXT(Imm,13));
   return 0;
 } 
 
 int BGEU (int Rs1, int Rs2, int Imm, int Funct3) {
   Imm = Imm << 1;
   if (CURRENT_STATE.REGS[Rs1] >= CURRENT_STATE.REGS[Rs2])
-    NEXT_STATE.PC = (CURRENT_STATE.PC - 4) + (SIGNEXT(Imm,13));
+    NEXT_STATE.PC = (CURRENT_STATE.PC) + (SIGNEXT(Imm,13));
   return 0;
 } 
 // B instructions   B instructions    B instructions
