@@ -4,7 +4,7 @@ CFLAGS  = -std=gnu99 -g -O2
 all:		sim
 
 sim:		shell.c shell.h isa.h sim.c
-		$(CC) $(CFLAGS) shell.c sim.c -o sim
+		$(CC) shell.c sim.c -o sim $(CFLAGS)
 
 clean: 
 		rm -f sim

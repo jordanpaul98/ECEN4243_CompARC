@@ -101,9 +101,9 @@ int ADDI (int Rd, int Rs1, int Imm, int Funct3) {
 }
 
 int LB (int Rd, int Rs1, int Imm, int Funct3){
-  int address = CURRENT_STATE.REGS[Rs1] + Imm;
+  uint32_t address = CURRENT_STATE.REGS[Rs1] + Imm;
   uint32_t word = mem_read_32(address);
-  int8_t byte;
+  uint8_t byte;
   if (address & 0x3 == 0) {
     byte = word & 0xFF;
   } else if ((address & 0x3) == 1) {
@@ -118,9 +118,9 @@ int LB (int Rd, int Rs1, int Imm, int Funct3){
 }
 
 int LH (int Rd, int Rs1, int Imm, int Funct3){
-  int address = CURRENT_STATE.REGS[Rs1] + Imm;
+  uint32_t address = CURRENT_STATE.REGS[Rs1] + Imm;
   uint32_t word = mem_read_32(address);
-  int16_t halfword;
+  uint16_t halfword;
   if (address & 0x2) {
     halfword = (word >> 16) & 0xffff;
   } else {
@@ -131,8 +131,8 @@ int LH (int Rd, int Rs1, int Imm, int Funct3){
 }
 
 int LW (int Rd, int Rs1, int Imm, int Funct3){
-  int address = CURRENT_STATE.REGS[Rs1] + Imm;
-  int word = mem_read_32(address);
+  uint32_t address = CURRENT_STATE.REGS[Rs1] + Imm;
+  uint32_t word = mem_read_32(address);
   NEXT_STATE.REGS[Rd] = word;
   return 0;
 }
@@ -218,7 +218,7 @@ int LUI (int Rd, int Imm) {
 
 // S Instruction    S Instruction   S Instruction
 int SB (int Rs1, int Rs2, int Imm, int Funct3){
-  int address = CURRENT_STATE.REGS[Rs1] + Imm;
+  uint32_t address = CURRENT_STATE.REGS[Rs1] + Imm;
   uint32_t word = mem_read_32(address & ~0x3);
   uint8_t byte = CURRENT_STATE.REGS[Rs2] & 0x000000FF;
   if ((address & 0x3) == 0) {
@@ -235,7 +235,7 @@ int SB (int Rs1, int Rs2, int Imm, int Funct3){
 }
 
 int SH (int Rs1, int Rs2, int Imm, int Funct3) {
-  int address = CURRENT_STATE.REGS[Rs1] + Imm;
+  uint32_t address = CURRENT_STATE.REGS[Rs1] + Imm;
   uint32_t word = mem_read_32(address & ~0x2);
   uint16_t halfword = CURRENT_STATE.REGS[Rs2] & 0x0000FFFF;
   if (address & 0x2) {
@@ -248,7 +248,7 @@ int SH (int Rs1, int Rs2, int Imm, int Funct3) {
 } 
 
 int SW (int Rs1, int Rs2, int Imm, int Funct3) {
-  int address = CURRENT_STATE.REGS[Rs1] + Imm;
+  uint32_t address = CURRENT_STATE.REGS[Rs1] + Imm;
   mem_write_32(address, CURRENT_STATE.REGS[Rs2]);
   return 0;
 } 

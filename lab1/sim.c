@@ -556,5 +556,4 @@ void process_instruction() {
   decode_and_execute(byte_to_binary32(inst_word));
 
   NEXT_STATE.PC += 4;
-
 }
