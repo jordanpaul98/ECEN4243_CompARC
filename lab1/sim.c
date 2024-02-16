@@ -48,11 +48,11 @@ int bchar_to_int(char* rsa) {
   int t = 0;
   while(rsa[i] != '\0'){ i++; }
   while(i>0){
-      --i;
-      result += (rsa[i] - '0')<<t;
-      // printf("%d\n", result);
-      t++;
-    }
+    --i;
+    result += (rsa[i] - '0')<<t;
+    // printf("%d\n", result);
+    t++;
+  }
   return result;
 }
 
@@ -235,6 +235,11 @@ int b_process(char* i_) {
     rs2[i] = i_[31-24+i];               // assigning bits 24-20 to 0-4
   }
   int Rs2 = bchar_to_int(rs2);          // convert rs2 to int   
+
+// 31 30 29 28 27 26 25 11 10 9  8  7  - bit position
+// 0  1  2  3  4  5  6  20 21 22 23 24 - array position
+// 12 10 9  8  7  6  5  4  3  2  1  11 - imm position
+// 0  2  3  4  5  6  7  8  9  10 11 1  - imm array position
 
   char imm[14]; imm[13] = '\0';         // Imm variable
   imm[12] = '0';                        // Assign trailing 0
@@ -439,9 +444,10 @@ int decode_and_execute(char* i_) {
      (i_[30] == '1') && (i_[31] == '1'))){
     printf("- This is a U Type Instruction. \n");
     u_process(i_);
-  } else if((i_[25] == '1') && (i_[26] == '1') &&
+  } else if(((i_[25] == '1') && (i_[26] == '1') &&
      (i_[27] == '1') && (i_[28] == '0') &&
-     (i_[29] == '0') && (i_[30] == '1') && (i_[31] == '1')) {
+     (i_[29] == '0') && (i_[30] == '1') && 
+     (i_[31] == '1'))) {
     printf("- This is a Software Interruption Instruction. \n");
     interruption_process(i_);
   } else {
@@ -463,7 +469,7 @@ void process_instruction() {
   // printf("33222222222211111111110000000000\n");  // What is the point of these
   // printf("10987654321098765432109876543210\n");  // lines of code?
   printf("---------------------------------------------------\n");
-  printf("%s \n", inst_word);
+  printf("%x \n", inst_word);
   printf("\n");
   decode_and_execute(inst);
 }
