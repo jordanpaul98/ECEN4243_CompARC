@@ -406,13 +406,9 @@ int interruption_process(char* i_) {
 // This function decode the instruction and update 
 // CPU_State (NEXT_STATE)
 int decode_and_execute(char* i_) {
-  if(((i_[25] == '0') && (i_[26] == '0') &&
-     (i_[27] == '1') && (i_[28] == '0') &&
-     (i_[29] == '0') && (i_[30] == '1') && 
-     (i_[31] == '1')) || ((i_[25] == '1') &&
-     (i_[26] == '1') && (i_[27] == '0') &&
-     (i_[28] == '0') && (i_[29] == '1') &&
-     (i_[30] == '1') && (i_[31] == '1'))) {
+    if(((i_[25] == '0') && (i_[26] == '0') && (i_[27] == '1') && (i_[28] == '0') && (i_[29] == '0') && (i_[30] == '1') && (i_[31] == '1')) || 
+       ((i_[25] == '1') && (i_[26] == '1') && (i_[27] == '0') && (i_[28] == '0') && (i_[29] == '1') && (i_[30] == '1') && (i_[31] == '1')) ||
+       ((i_[25] == '0') && (i_[26] == '0') && (i_[27] == '0') && (i_[28] == '0') && (i_[29] == '0') && (i_[30] == '1') && (i_[31] == '1'))) {
     printf("- This is an I Type Instruction. \n");
     i_process(i_);
   } else if((i_[25] == '0') && (i_[26] == '1') &&
@@ -453,6 +449,7 @@ int decode_and_execute(char* i_) {
   } else {
     printf("- This is an Invalid Instruction. \n");
     printf("Opcode = %s\n", i_);
+    exit(1);
   }
   return 0;
 }
