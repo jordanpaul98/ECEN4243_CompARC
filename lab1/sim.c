@@ -14,6 +14,81 @@
 // #include "shell.c"
 #include "isa.h"
 
+#define ADD_INSTRUCTION     0
+#define ADDI_INSTRUCTION    1
+#define AND_INSTRUCTION     2
+#define ANDI_INSTRUCTION    3
+#define AUIPC_INSTRUCTION   4
+#define BEQ_INSTRUCTION     5
+#define BGE_INSTRUCTION     6
+#define BGEU_INSTRUCTION    7
+#define BLT_INSTRUCTION     8
+#define BLTU_INSTRUCTION    9
+#define BNE_INSTRUCTION     10
+#define JAL_INSTRUCTION     11
+#define JALR_INSTRUCTION    12
+#define LB_INSTRUCTION      13
+#define LBU_INSTRUCTION     14
+#define LH_INSTRUCTION      15
+#define LHU_INSTRUCTION     16
+#define LUI_INSTRUCTION     17
+#define LW_INSTRUCTION      18
+#define OR_INSTRUCTION      19
+#define ORI_INSTRUCTION     20
+#define SB_INSTRUCTION      21
+#define SH_INSTRUCTION      22
+#define SLL_INSTRUCTION     23
+#define SLLI_INSTRUCTION    24
+#define SLT_INSTRUCTION     25
+#define SLTI_INSTRUCTION    26
+#define SLTIU_INSTRUCTION   27
+#define SLTU_INSTRUCTION    28
+#define SRA_INSTRUCTION     29
+#define SRAI_INSTRUCTION    30
+#define SRL_INSTRUCTION     31
+#define SRLI_INSTRUCTION    32
+#define SUB_INSTRUCTION     33
+#define SW_INSTRUCTION      34
+#define XOR_INSTRUCTION     35
+#define XORI_INSTRUCTION    36
+#define ECALL_INSTRUCTION   37
+
+const char* instructions_names[38] = {
+  "ADD",  "ADDI", "AND",  "ANDI",  "AUIPC", "BEQ",
+  "BGE",  "BGEU", "BLT",  "BLTU",  "BNE",   "JAL",
+  "JALR", "LB",   "LBU",  "LH",    "LHU",   "LUI",
+  "LW",   "OR",   "ORI",  "SB",    "SH",    "SLL",
+  "SLLI", "SLT",  "SLTI", "SLTIU", "SLTU",  "SRA", 
+  "SRAI", "SRL",  "SRLI", "SUB",   "SW",    "XOR", 
+  "XORI", "ECALL"
+  };
+
+int instruction_calls[100];
+int total_instruction_calls = 0;
+
+void recordInstruction(int callType){
+  instruction_calls[callType]++;
+  total_instruction_calls++;
+}
+
+void clearRecordedCalls(){
+  for (int i = 0; i < 100; i++) { instruction_calls[i] = 0; }
+  total_instruction_calls = 0;
+}
+
+void printInstructionCallStats(){
+  if (total_instruction_calls == 0){
+    printf("\n\nNo instructions recorded\n\n");
+  }else{
+    printf("\n\nRecorded Calls: %i Instruction calls performed\n", total_instruction_calls);
+    for (int i = 0; i < 38; i++){
+      if (instruction_calls[i] == 0) continue;
+      double percentage = 100 * instruction_calls[i] / (double)total_instruction_calls;
+      printf("[%s] calls: %i ... %.2f%%\n", instructions_names[i], instruction_calls[i], percentage);
+    }
+  }
+  printf("\n");
+}
 
 char *byte_to_binary(int x) {
 
@@ -99,28 +174,46 @@ int r_process(char* i_) {
   if(!strcmp(d_opcode,"0110011")) {
     switch(Funct3){
       case 0x0:
-        ((Funct7 & 0x20) == 0x20) ? SUB(Rd, Rs1, Rs2, Funct3) : ADD(Rd, Rs1, Rs2, Funct3);
+        if ((Funct7 & 0x20) == 0x20){
+          SUB(Rd, Rs1, Rs2, Funct3);
+          recordInstruction(ADD_INSTRUCTION);
+        }else{
+          ADD(Rd, Rs1, Rs2, Funct3);
+          recordInstruction(SUB_INSTRUCTION);
+        }
         break;
       case 0x1:
         SLL(Rd, Rs1, Rs2, Funct3);
+        recordInstruction(SLL_INSTRUCTION);
         break;
       case 0x2:
         SLT(Rd, Rs1, Rs2, Funct3);
+        recordInstruction(SLT_INSTRUCTION);
         break;
       case 0x3:
         SLTU(Rd, Rs1, Rs2, Funct3);
+        recordInstruction(SLTU_INSTRUCTION);
         break;
       case 0x4:
         XOR(Rd, Rs1, Rs2, Funct3);
+        recordInstruction(XOR_INSTRUCTION);
         break;
       case 0x5:
-        ((Funct7 & 0x20) == 0x20) ? SRA(Rd, Rs1, Rs2, Funct3) : SRL(Rd, Rs1, Rs2, Funct3);
+        if ((Funct7 & 0x20) == 0x20) {
+          SRA(Rd, Rs1, Rs2, Funct3);
+          recordInstruction(SRA_INSTRUCTION);
+        } else {
+          SRL(Rd, Rs1, Rs2, Funct3);
+          recordInstruction(SRL_INSTRUCTION);
+        }
         break;
       case 0x6:
         OR(Rd, Rs1, Rs2, Funct3);
+        recordInstruction(OR_INSTRUCTION);
         break;
       case 0x7:
         AND(Rd, Rs1, Rs2, Funct3);
+        recordInstruction(AND_INSTRUCTION);
         break;
     }
   }
@@ -165,18 +258,23 @@ int i_process(char* i_) {
     switch(Funct3){
       case 0x0:
           LB  (Rd, Rs1, Imm, Funct3);
+          recordInstruction(LB_INSTRUCTION);
           break;
       case 0x1:
           LH  (Rd, Rs1, Imm, Funct3);
+          recordInstruction(LH_INSTRUCTION);
           break;
       case 0x2:
           LW  (Rd, Rs1, Imm, Funct3);
+          recordInstruction(LW_INSTRUCTION);
           break;
       case 0x4:
           LBU (Rd, Rs1, Imm, Funct3);
+          recordInstruction(LBU_INSTRUCTION);
           break;
       case 0x5:
           LHU (Rd, Rs1, Imm, Funct3);
+          recordInstruction(LHU_INSTRUCTION);
           break;
     }
     return 0;
@@ -184,32 +282,46 @@ int i_process(char* i_) {
     switch(Funct3){
       case 0x0: 
           ADDI  (Rd, Rs1, Imm, Funct3);
+          recordInstruction(ADDI_INSTRUCTION);
           break;
       case 0x1:
           SLLI  (Rd, Rs1, Imm, Funct3);
+          recordInstruction(SLLI_INSTRUCTION);
           break;
       case 0x2: 
           SLTI  (Rd, Rs1, Imm, Funct3);
+          recordInstruction(SLTI_INSTRUCTION);
           break;
       case 0x3:
           SLTIU (Rd, Rs1, Imm, Funct3);
+          recordInstruction(SLTIU_INSTRUCTION);
           break;
       case 0x4:
           XORI  (Rd, Rs1, Imm, Funct3);
+          recordInstruction(XORI_INSTRUCTION);
           break;
       case 0x5:
           // funct7 000000* for SRLI, 010000* for SRAI
-          ((Imm & 0x400) == 0x400) ? SRAI(Rd, Rs1, Imm, Funct3) : SRLI(Rd, Rs1, Imm, Funct3);
+          if ((Imm & 0x400) == 0x400){
+            SRAI(Rd, Rs1, Imm, Funct3);
+            recordInstruction(SRAI_INSTRUCTION);
+          } else {
+            SRLI(Rd, Rs1, Imm, Funct3);
+            recordInstruction(SRLI_INSTRUCTION);
+          }
           break;
       case 0x6:
           ORI   (Rd, Rs1, Imm, Funct3);
+          recordInstruction(ORI_INSTRUCTION);
           break;
       case 0x7:
           ANDI  (Rd, Rs1, Imm, Funct3);
+          recordInstruction(ANDI_INSTRUCTION);
           break;
     }
   } else if (!strcmp(d_opcode, "1100111")) {
     JALR  (Rd, Rs1, Imm);
+    recordInstruction(JALR_INSTRUCTION);
   }
   return 1;	
 }
@@ -262,21 +374,27 @@ int b_process(char* i_) {
     switch(Funct3){
       case 0x0:
         BEQ(Rs1, Rs2, Imm, Funct3);
+        recordInstruction(BEQ_INSTRUCTION);
         break;
       case 0x1:
         BNE(Rs1, Rs2, Imm, Funct3);
+        recordInstruction(BNE_INSTRUCTION);
         break;
       case 0x4:
         BLT(Rs1, Rs2, Imm, Funct3);
+        recordInstruction(BLT_INSTRUCTION);
         break;
       case 0x5:
         BGE(Rs1, Rs2, Imm, Funct3);
+        recordInstruction(BGE_INSTRUCTION);
         break;
       case 0x6:
         BLTU(Rs1, Rs2, Imm, Funct3);
+        recordInstruction(BLTU_INSTRUCTION);
         break;
       case 0x7:
         BGEU(Rs1, Rs2, Imm, Funct3);
+        recordInstruction(BGEU_INSTRUCTION);
         break;
     }
   }	    
@@ -323,12 +441,15 @@ int s_process(char* i_) {
     switch(Funct3){
       case 0x0:
         SB(Rs1, Rs2, Imm, Funct3);
+        recordInstruction(SB_INSTRUCTION);
         break;
       case 0x1:
         SH(Rs1, Rs2, Imm, Funct3);
+        recordInstruction(SH_INSTRUCTION);
         break;
       case 0x2:
         SW(Rs1, Rs2, Imm, Funct3);
+        recordInstruction(SW_INSTRUCTION);
         break;
     }
   }	    
@@ -364,6 +485,7 @@ int j_process(char* i_) {
 
   if(!strcmp(d_opcode,"1101111")) {
     JAL(Rd, Imm);
+    recordInstruction(JAL_INSTRUCTION);
   }
   return 1;
 }
@@ -393,8 +515,10 @@ int u_process(char* i_) {
   
   if(!strcmp(d_opcode,"0010111")) {
     AUIPC(Rd, Imm);
+    recordInstruction(AUIPC_INSTRUCTION);
   } else if (!strcmp(d_opcode,"0110111")) {
     LUI(Rd, Imm);
+    recordInstruction(LUI_INSTRUCTION);
   }
   return 1;
 }
@@ -402,6 +526,7 @@ int u_process(char* i_) {
 int interruption_process(char* i_) {
   ECALL(i_);
   RUN_BIT = 0;
+  recordInstruction(ECALL_INSTRUCTION);
   return 0;
 }
 
