@@ -182,9 +182,13 @@ void go() {
   }
 
   printf("Simulating...\n\n");
+  clearRecordedCalls(); // reset the instruction call count
+
   while (RUN_BIT)
     cycle();
-  printf("Simulator halted\n\n");
+  printInstructionCallStats(); // print the instruction call stats
+
+  printf("\nSimulator halted\n\n");
 }
 
 /***************************************************************/ 
