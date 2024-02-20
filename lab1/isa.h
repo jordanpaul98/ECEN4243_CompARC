@@ -365,7 +365,7 @@ int JALR (int Rd, int Rs1, int Imm) {
 
 // J instruction J instruction J instruction
 int JAL (int Rd, int imm) {
-    NEXT_STATE.PC = CURRENT_STATE.REGS[Rs1] + (SIGNEXT(imm,20));
+    NEXT_STATE.PC = CURRENT_STATE.REGS[Rd] + (SIGNEXT(imm,20));
     NEXT_STATE.REGS[Rd] = CURRENT_STATE.PC + 4;
     return 0;
 } 
