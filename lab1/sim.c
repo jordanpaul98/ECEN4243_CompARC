@@ -14,6 +14,10 @@
 // #include "shell.c"
 #include "isa.h"
 
+/*
+Instrunction indexing for recording calls
+*/
+
 #define ADD_INSTRUCTION     0
 #define ADDI_INSTRUCTION    1
 #define AND_INSTRUCTION     2
@@ -63,7 +67,7 @@ const char* instructions_names[38] = {
   "XORI", "ECALL"
   };
 
-int instruction_calls[100];
+int instruction_calls[38];
 int total_instruction_calls = 0;
 
 void recordInstruction(int callType){
@@ -72,7 +76,7 @@ void recordInstruction(int callType){
 }
 
 void clearRecordedCalls(){
-  for (int i = 0; i < 100; i++) { instruction_calls[i] = 0; }
+  for (int i = 0; i < 38; i++) { instruction_calls[i] = 0; }
   total_instruction_calls = 0;
 }
 
@@ -89,6 +93,11 @@ void printInstructionCallStats(){
   }
   printf("\n");
 }
+
+/*
+ end of instruction call functions
+
+*/
 
 char *byte_to_binary(int x) {
 
