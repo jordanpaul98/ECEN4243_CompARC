@@ -36,5 +36,8 @@ void     mem_write_32(uint32_t address, uint32_t value);
 
 /* YOU IMPLEMENT THIS FUNCTION */
 void process_instruction();
+void recordInstruction(int callType);
+void printInstructionCallStats();
+void clearRecordedCalls();
 
 #endif
