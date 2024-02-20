@@ -94,8 +94,9 @@ int r_process(char* i_) {
   
   printf ("Opcode = %s\n Rs1 = %d\n Rs2 = %d\n Rd = %d\n Funct3 = %d\n\n", d_opcode, Rs1, Rs2, Rd, Funct3);
 
+  if (Rd == 0) { printf("Warning: Writing to Zero Register\n"); }
+
   if(!strcmp(d_opcode,"0110011")) {
-    ADD(Rd, Rs1, Rs2, Funct3);
     switch(Funct3){
       case 0x0:
         ((Funct7 & 0x20) == 0x20) ? SUB(Rd, Rs1, Rs2, Funct3) : ADD(Rd, Rs1, Rs2, Funct3);
@@ -157,6 +158,8 @@ int i_process(char* i_) {
   int Imm = bchar_to_int(imm);          // convert imm to int
 
   printf ("Opcode = %s\n Rs1 = %d\n Imm = %d\n Rd = %d\n Funct3 = %d\n\n", d_opcode, Rs1, Imm, Rd, Funct3);
+
+  if (Rd == 0) { printf("Warning: Writing to Zero Register\n"); }
 
   if(!strcmp(d_opcode,"0000011")) {
     switch(Funct3){
@@ -324,7 +327,7 @@ int s_process(char* i_) {
       case 0x1:
         SH(Rs1, Rs2, Imm, Funct3);
         break;
-      case 0x4:
+      case 0x2:
         SW(Rs1, Rs2, Imm, Funct3);
         break;
     }
@@ -378,16 +381,15 @@ int u_process(char* i_) {
   }
   int Rd = bchar_to_int(rd);            // Convert rd to int
 
-  char imm[33]; imm[32] = '\0';         // Imm variable
+  char imm[21]; imm[20] = '\0';         // Imm variable
   for (int i = 0; i < 20; i++) {        // Assigning bits to imm
-    imm[i] = i_[i];
-  }
-  for (int i = 0; i < 12; i++) {        // Assigning trailing 0s to imm
-    imm[31 - 11 + i] = '0';
+    imm[i] = i_[31 - 31 + i];
   }
   int Imm = bchar_to_int(imm);          // Convert imm to int
   
   printf ("Opcode = %s\n Imm = %d\n Rd = %d\n\n", d_opcode, Imm, Rd);
+
+  if (Rd == 0) { printf("Warning: Writing to Zero Register\n"); }
   
   if(!strcmp(d_opcode,"0010111")) {
     AUIPC(Rd, Imm);
@@ -466,7 +468,7 @@ void process_instruction() {
   // printf("33222222222211111111110000000000\n");  // What is the point of these
   // printf("10987654321098765432109876543210\n");  // lines of code?
   printf("---------------------------------------------------\n");
-  printf("%x \n", inst_word);
+  //printf("%x \n", inst_word);
   printf("\n");
   decode_and_execute(inst);
 }
