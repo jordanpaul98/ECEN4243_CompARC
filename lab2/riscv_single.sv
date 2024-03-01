@@ -159,12 +159,12 @@ module maindec (input  logic [6:0] op,
    always_comb
      case(op)
        // RegWrite_ImmSrc_ALUSrc_MemWrite_ResultSrc_Branch_ALUOp_Jump
-       7'b0000011: controls = 11'b1_00_1_0_01_0_00_0; // lw
-       7'b0100011: controls = 11'b0_01_1_1_00_0_00_0; // sw
+       7'b0000011: controls = 11'b1_00_1_0_01_0_00_0; // load
+       7'b0100011: controls = 11'b0_01_1_1_00_0_00_0; // save
        7'b0110011: controls = 11'b1_xx_0_0_00_0_10_0; // R–type
-       7'b1100011: controls = 11'b0_10_0_0_00_1_01_0; // beq
+       7'b1100011: controls = 11'b0_10_0_0_00_1_01_0; // B-Type
        7'b0010011: controls = 11'b1_00_1_0_00_0_10_0; // I–type ALU
-       7'b1101111: controls = 11'b1_11_0_0_10_0_00_1; // jal
+       7'b1101111: controls = 11'b1_11_0_0_10_0_00_1; // Jump
        default: controls = 11'bx_xx_x_x_xx_x_xx_x; // ???
      endcase // case (op)
    
@@ -174,25 +174,32 @@ module aludec (input  logic       opb5,
 	       input  logic [2:0] funct3,
 	       input  logic 	  funct7b5,
 	       input  logic [1:0] ALUOp,
-	       output logic [2:0] ALUControl);
+	       output logic [3:0] ALUControl);
    
    logic 			  RtypeSub;
    
    assign RtypeSub = funct7b5 & opb5; // TRUE for R–type subtract
    always_comb
      case(ALUOp)
-       2'b00: ALUControl = 3'b000; // addition
-       2'b01: ALUControl = 3'b001; // subtraction
+       2'b00: ALUControl = 4'b0000; // addition
+       2'b01: ALUControl = 4'b0001; // subtraction
        default: case(funct3) // R–type or I–type ALU
-		  3'b000: if (RtypeSub)
-		    ALUControl = 3'b001; // sub
-		  else
-		    ALUControl = 3'b000; // add, addi
-		  3'b010: ALUControl = 3'b101; // slt, slti
-		  3'b110: ALUControl = 3'b011; // or, ori
-		  3'b111: ALUControl = 3'b010; // and, andi
-		  default: ALUControl = 3'bxxx; // ???
-		endcase // case (funct3)       
+		    3'b000: if (RtypeSub)
+		              ALUControl = 4'b0001; // sub
+		            else
+		              ALUControl = 4'b0000; // add, addi
+		    3'b010:   ALUControl = 4'b0101; // slt, slti
+		    3'b110:   ALUControl = 4'b0011; // or, ori
+		    3'b111:   ALUControl = 4'b0010; // and, andi
+        3'b100:   ALUControl = 4'b0100; // xor, xori
+        3'b101: if (RtypeSub)   
+                  ALUControl = 4'b0111; // sra, srai
+                else
+                  ALUControl = 4'b0110; // srl, srli
+        3'b001:   ALUControl = 4'b1000; // sll, slli
+        3'b011:   ALUControl = 4'b1001; // sltu, sltiu
+		    default:  ALUControl = 4'bxxxx; // ???
+		   endcase // case (funct3)       
      endcase // case (ALUOp)
    
 endmodule // aludec
@@ -202,7 +209,7 @@ module datapath (input  logic        clk, reset,
 		 input  logic 	     PCSrc, ALUSrc,
 		 input  logic 	     RegWrite,
 		 input  logic [1:0]  ImmSrc,
-		 input  logic [2:0]  ALUControl,
+		 input  logic [3:0]  ALUControl,
 		 output logic 	     Zero,
 		 output logic [31:0] PC,
 		 input  logic [31:0] Instr,
@@ -332,27 +339,35 @@ module dmem (input  logic        clk, we,
 endmodule // dmem
 
 module alu (input  logic [31:0] a, b,
-            input  logic [2:0] 	alucontrol,
+            input  logic [3:0] 	alucontrol,
             output logic [31:0] result,
             output logic 	zero);
 
-   logic [31:0] 	       condinvb, sum;
+   logic [31:0] 	       condinvb, sum, xorOut, sltuOut;
    logic 		       v;              // overflow
    logic 		       isAddSub;       // true when is add or subtract operation
+
 
    assign condinvb = alucontrol[0] ? ~b : b;
    assign sum = a + condinvb + alucontrol[0];
    assign isAddSub = ~alucontrol[2] & ~alucontrol[1] |
                      ~alucontrol[1] & alucontrol[0];   
+   assign xorOut = a ^ b;
+   assign sltuOut = unsigned'(a) < ungisned'(b);
 
    always_comb
      case (alucontrol)
-       3'b000:  result = sum;         // add
-       3'b001:  result = sum;         // subtract
-       3'b010:  result = a & b;       // and
-       3'b011:  result = a | b;       // or
-       3'b101:  result = sum[31] ^ v; // slt       
-       default: result = 32'bx;
+       4'b0000:  result = sum;         // add
+       4'b0001:  result = sum;         // subtract
+       4'b0010:  result = a & b;       // and
+       4'b0011:  result = a | b;       // or
+       4'b0101:  result = sum[31] ^ v; // slt 
+       4'b0110:  result = a >> b;      // srl  
+       4'b0111:  result = a >>> b;     // sra
+       4'b0100:  result = xorOut;      // xor  
+       4'b1000   result = a << b;      // sll
+       4'b1001:  result = sltuOut;     // sltu
+       default:  result = 32'bx;
      endcase
 
    assign zero = (result == 32'b0);
