@@ -25,6 +25,33 @@
 //   sw           0100011   010       immediate
 //   jal          1101111   immediate immediate
 
+// Add the following to the code:
+//  Instruction   opcode    funct3    funct7
+//  bge
+//  bgeu
+//  blt
+//  bltu
+//  bne
+//  jalr
+//  lb
+//  lbu
+//  lh
+//  lhu
+//  lui
+//  sb
+//  sh
+//  sll
+//  slli
+//  sltiu
+//  sltu
+//  sra
+//  srai
+//  srl
+//  srli
+//  xor
+//  xori
+
+
 module testbench();
 
    logic        clk;
