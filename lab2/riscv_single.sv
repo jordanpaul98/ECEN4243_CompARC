@@ -40,16 +40,16 @@
 //  lui
 //  sb
 //  sh
-//  sll
-//  slli
-//  sltiu
-//  sltu
-//  sra
-//  srai
-//  srl
-//  srli
-//  xor
-//  xori
+//  sll    Done
+//  slli   Done
+//  sltiu  Done
+//  sltu   Done
+//  sra    Done
+//  srai   Done
+//  srl    Done
+//  srli   Done
+//  xor    Done
+//  xori   Done
 
 
 module testbench();
