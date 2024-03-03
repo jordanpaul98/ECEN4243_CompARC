@@ -27,6 +27,7 @@
 
 // Add the following to the code:
 //  Instruction   opcode    funct3    funct7
+
 //  bge    Done
 //  bgeu   Done
 //  blt    Done
