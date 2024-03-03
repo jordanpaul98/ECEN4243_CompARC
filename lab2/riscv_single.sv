@@ -27,11 +27,12 @@
 
 // Add the following to the code:
 //  Instruction   opcode    funct3    funct7
-//  bge           1100011
-//  bgeu
-//  blt
-//  bltu
-//  bne
+
+//  bge    Done
+//  bgeu   Done
+//  blt    Done
+//  bltu   Done
+//  bne    Done
 //  jalr
 //  lb
 //  lbu
@@ -165,7 +166,7 @@ module maindec (input  logic [6:0] op,
        7'b1100011: controls = 12'b0_010_0_0_00_1_01_0; // B-Type
        7'b0010011: controls = 12'b1_000_1_0_00_0_10_0; // I–type ALU
        7'b1101111: controls = 12'b1_011_0_0_10_0_00_1; // Jal
-       7'b1100111: controls = 12'b0_000_0_00_0_00_1; // jalr     FIXME: not implemented
+       7'b1100111: controls = 12'b0_000_0_10_0_00_1;   // jalr     FIXME: not implemented
        7'b0010111: controls = 12'b0_000_0_0_00_0_00_1; // auipc    FIXME: not implemented
        7'b0110111: controls = 12'b1_100_1_0_00_0_00_0; // lui      FIXME: not implemented
 
@@ -176,7 +177,7 @@ endmodule // maindec
 
 module aludec (input  logic       opb5,
 	       input  logic [2:0] funct3,
-	       input  logic 	  funct7b5,
+	       input  logic 	    funct7b5,
 	       input  logic [1:0] ALUOp,
 	       output logic [3:0] ALUControl);
    
@@ -186,7 +187,13 @@ module aludec (input  logic       opb5,
    always_comb
      case(ALUOp)
        2'b00: ALUControl = 4'b0000; // addition
-       2'b01: ALUControl = 4'b0001; // subtraction
+      //  2'b01: ALUControl = 4'b0001; // subtraction
+       2'b01: if funct3[1] == 1
+                  ALUControl = 4'b1011; // subtraction beq/bne
+              else if func3[2] == 1
+                  ALUControl = 4'b1101; // subtraction blt/bge
+              else 
+                  ALUControl = 4'b1111; // subtraction bltu/bgeu
        default: case(funct3) // R–type or I–type ALU
 		    3'b000: if (RtypeSub)
 		              ALUControl = 4'b0001; // sub
@@ -373,10 +380,19 @@ module alu (input  logic [31:0] a, b,
        4'b0100:  result = xorOut;      // xor  
        4'b1000   result = a << b;      // sll
        4'b1001:  result = sltuOut;     // sltu
+       4'b1011:  result = sum;         // beq, bne
+       4'b1101:  result = sum;         // blt, bge
+       4'b1111:  result = sum;         // bltu, bgeu
        default:  result = 32'bx;
      endcase
 
-   assign zero = (result == 32'b0);
+   case (alucontrol) 
+     4'b1011: assign zero = (result == 32'b0);
+     4'b1101: assign zero = (result < 32'b0);
+     4'b1111: assign unsigned'(condinvb) = alucontrol[0] ? unsigned'~(b) : unsigned'(b);
+              assign sum = unsigned'(a) + unsigned'(condinvb) + alucontrol[0];
+              assign zero = (sum < 32'b0);
+   endcase
    assign v = ~(alucontrol[0] ^ a[31] ^ b[31]) & (a[31] ^ sum[31]) & isAddSub;
    
 endmodule // alu
