@@ -26,12 +26,12 @@
 //   jal          1101111   immediate immediate
 
 // Add the following to the code:
-//  Instruction   opcode    funct3    funct7
-//  bge    Done
-//  bgeu   Done
-//  blt    Done
-//  bltu   Done
-//  bne    Done
+//  Instruction   opcode    funct3    funct7    Done?
+//  bge           1100011   101       immediate Done
+//  bgeu          1100011   111       immediate Done
+//  blt           1100011   100       immediate Done
+//  bltu          1100011   110       immediate Done
+//  bne           1100011   001       immediate Done 
 //  jalr
 //  lb
 //  lbu
@@ -40,16 +40,16 @@
 //  lui
 //  sb
 //  sh
-//  sll    Done
-//  slli   Done
-//  sltiu  Done
-//  sltu   Done
-//  sra    Done
-//  srai   Done
-//  srl    Done
-//  srli   Done
-//  xor    Done
-//  xori   Done
+//  sll           0110011   001       0000000   Done
+//  slli          0010011   001       000000*   Done
+//  sltiu         0010011   011                 Done
+//  sltu          0110011   011                 Done
+//  sra           0110011   101                 Done
+//  srai          0010011   101                 Done
+//  srl           0110011   101                 Done
+//  srli          0010011   101                 Done
+//  xor           0110011   100                 Done
+//  xori          0010011   100                 Done
 
 
 module testbench();
