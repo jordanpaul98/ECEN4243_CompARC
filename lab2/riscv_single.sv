@@ -140,6 +140,7 @@ module controller (input  logic [6:0] op,
    maindec md (op, ResultSrc, MemWrite, Branch,
 	       ALUSrc, RegWrite, Jump, ImmSrc, ALUOp);
    aludec ad (op[5], funct3, funct7b5, ALUOp, ALUControl);
+
    assign PCSrc = Branch & (Zero ^ funct3[0]) | Jump;
    
 endmodule // controller
@@ -166,10 +167,10 @@ module maindec (input  logic [6:0] op,
        7'b0110011: controls = 12'b1_xxx_0_0_00_0_10_0; // R–type
        7'b1100011: controls = 12'b0_010_0_0_00_1_01_0; // B-Type
        7'b0010011: controls = 12'b1_000_1_0_00_0_10_0; // I–type ALU
-       7'b1101111: controls = 12'b1_011_0_0_10_0_00_1; // Jal
-       7'b1100111: controls = 12'b1_000_0_0_10_0_00_1; // jalr     FIXME: not implemented
-       7'b0010111: controls = 12'b0_100_0_0_00_0_00_1; // auipc    FIXME: not implemented
-       7'b0110111: controls = 12'b1_100_1_0_00_0_00_0; // lui      FIXME: not implemented
+       7'b1101111: controls = 12'b1_011_x_0_10_0_xx_1; // Jal      lec 10 slide 29
+       7'b1100111: controls = 12'b1_011_x_0_10_0_xx_1; // jalr     FIXME: not implemented (same as jal, jal short name jalr with imm = 0)
+       7'b0010111: controls = 12'b0_100_x_0_00_0_xx_1; // auipc    FIXME: not implemented (add upper immediate to pc, U type ) (PCsrc come from PCTarget)
+       7'b0110111: controls = 12'b1_100_1_0_00_0_00_0; // lui      FIXME: not implemented ( load upper immediate, U type)
 
        default: controls = 12'bx_xxx_x_x_xx_x_xx_x; // ???
      endcase // case (op)
@@ -185,13 +186,15 @@ module aludec (input  logic       opb5,
    logic 			  RtypeSub;
    
    assign RtypeSub = funct7b5 & opb5; // TRUE for R–type subtract
+
+
    always_comb
      case(ALUOp)
        2'b00: ALUControl = 4'b0000; // addition
       //  2'b01: ALUControl = 4'b0001; // subtraction
-       2'b01: if funct3[1] == 1
+       2'b01: if (funct3 == 3'b000 || func3 == 3'b001) // used full funct 3 for clarity code - jordan
                   ALUControl = 4'b1011; // subtraction beq/bne
-              else if func3[2] == 1
+              else if (func3 == 3'b100 || func3 == 3'b101) // used full funct 3 for clarity code - jordan
                   ALUControl = 4'b1101; // subtraction blt/bge
               else 
                   ALUControl = 4'b1111; // subtraction bltu/bgeu
@@ -391,8 +394,8 @@ module alu (input  logic [31:0] a, b,
      4'b1011: assign zero = (result == 32'b0);
      4'b1101: assign zero = (result < 32'b0);
      4'b1111: assign unsigned'(condinvb) = alucontrol[0] ? unsigned'~(b) : unsigned'(b);
-              assign sum = unsigned'(a) + unsigned'(condinvb) + alucontrol[0];
-              assign zero = (sum < 32'b0);
+              assign temp_sum = unsigned'(a) + unsigned'(condinvb) + alucontrol[0]; // added a temp_sum just to ensure sum isn't modified
+              assign zero = (temp_sum < 32'b0);
    endcase
    assign v = ~(alucontrol[0] ^ a[31] ^ b[31]) & (a[31] ^ sum[31]) & isAddSub;
    
