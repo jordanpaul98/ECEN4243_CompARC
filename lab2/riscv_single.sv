@@ -26,30 +26,31 @@
 //   jal          1101111   immediate immediate
 
 // Add the following to the code:
-//  Instruction   opcode    funct3    funct7    Done?
-//  bge           1100011   101       immediate Done
-//  bgeu          1100011   111       immediate Done
-//  blt           1100011   100       immediate Done
-//  bltu          1100011   110       immediate Done
-//  bne           1100011   001       immediate Done 
-//  jalr
-//  lb
-//  lbu
-//  lh
-//  lhu
-//  lui
-//  sb
-//  sh
-//  sll           0110011   001       0000000   Done
-//  slli          0010011   001       000000*   Done
-//  sltiu         0010011   011                 Done
-//  sltu          0110011   011                 Done
-//  sra           0110011   101                 Done
-//  srai          0010011   101                 Done
-//  srl           0110011   101                 Done
-//  srli          0010011   101                 Done
-//  xor           0110011   100                 Done
-//  xori          0010011   100                 Done
+//  Instruction   opcode    funct3    funct7      Done?
+//  auipc         0010111   imm       immediate   Done
+//  bge           1100011   101       immediate   Done
+//  bgeu          1100011   111       immediate   Done
+//  blt           1100011   100       immediate   Done
+//  bltu          1100011   110       immediate   Done
+//  bne           1100011   001       immediate   Done 
+//  jalr          1100111   000       immediate
+//  lb            0000011   000       immediate
+//  lbu           0000011   100       immediate
+//  lh            0000011   001       immediate
+//  lhu           0000011   101       immediate
+//  lui           0110111   imm       immediate
+//  sb            0100011   000       immediate
+//  sh            0100011   001       immediate
+//  sll           0110011   001       0000000     Done
+//  slli          0010011   001       000000*     Done
+//  sltiu         0010011   011       immediate   Done
+//  sltu          0110011   011       0000000     Done
+//  sra           0110011   101       0100000     Done
+//  srai          0010011   101       010000**    Done
+//  srl           0110011   101       0000000     Done
+//  srli          0010011   101       000000*     Done
+//  xor           0110011   100       0000000     Done
+//  xori          0010011   100       immediate   Done
 
 
 module testbench();
@@ -159,17 +160,18 @@ module maindec (input  logic [6:0] op,
    always_comb
      case(op)
        // RegWrite_ImmSrc_ALUSrc_MemWrite_ResultSrc_Branch_ALUOp_Jump
+       //    x    _  xxx _  x   _    x   _    xx   _   x  _  xx _  x
        7'b0000011: controls = 12'b1_000_1_0_01_0_00_0; // load
        7'b0100011: controls = 12'b0_001_1_1_00_0_00_0; // save
        7'b0110011: controls = 12'b1_xxx_0_0_00_0_10_0; // R–type
        7'b1100011: controls = 12'b0_010_0_0_00_1_01_0; // B-Type
        7'b0010011: controls = 12'b1_000_1_0_00_0_10_0; // I–type ALU
        7'b1101111: controls = 12'b1_011_0_0_10_0_00_1; // Jal
-       7'b1100111: controls = 12'b0_000_0_10_0_00_1;   // jalr     FIXME: not implemented
-       7'b0010111: controls = 12'b0_000_0_0_00_0_00_1; // auipc    FIXME: not implemented
+       7'b1100111: controls = 12'b1_000_0_0_10_0_00_1; // jalr     FIXME: not implemented
+       7'b0010111: controls = 12'b0_100_0_0_00_0_00_1; // auipc    FIXME: not implemented
        7'b0110111: controls = 12'b1_100_1_0_00_0_00_0; // lui      FIXME: not implemented
 
-       default: controls = 11'bx_xx_x_x_xx_x_xx_x; // ???
+       default: controls = 12'bx_xxx_x_x_xx_x_xx_x; // ???
      endcase // case (op)
    
 endmodule // maindec
