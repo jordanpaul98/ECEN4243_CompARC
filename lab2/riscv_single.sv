@@ -361,7 +361,7 @@ module alu (input  logic [31:0] a, b,
             output logic 	zero);
 
    logic [31:0] 	       condinvb, sum, xorOut, sltuOut;
-   logic 		       v;              // overflow
+   logic 		       overflow, Cout, carry, negative;              // overflow
    logic 		       isAddSub;       // true when is add or subtract operation
 
 
@@ -378,7 +378,7 @@ module alu (input  logic [31:0] a, b,
        4'b0001:  result = sum;         // subtract
        4'b0010:  result = a & b;       // and
        4'b0011:  result = a | b;       // or
-       4'b0101:  result = sum[31] ^ v; // slt 
+       4'b0101:  result = sum[31] ^ overflow; // slt 
        4'b0110:  result = a >> b;      // srl  
        4'b0111:  result = a >>> b;     // sra
        4'b0100:  result = xorOut;      // xor  
@@ -390,14 +390,41 @@ module alu (input  logic [31:0] a, b,
        default:  result = 32'bx;
      endcase
 
-   case (alucontrol) 
-     4'b1011: assign zero = (result == 32'b0);
-     4'b1101: assign zero = (result < 32'b0);
-     4'b1111: assign unsigned'(condinvb) = alucontrol[0] ? unsigned'~(b) : unsigned'(b);
-              assign temp_sum = unsigned'(a) + unsigned'(condinvb) + alucontrol[0]; // added a temp_sum just to ensure sum isn't modified
-              assign zero = (temp_sum < 32'b0);
+   //case (alucontrol) 
+   //  4'b1011: assign zero = (result == 32'b0);
+   //  4'b1101: assign zero = (result < 32'b0);
+   //  4'b1111: assign unsigned'(condinvb) = alucontrol[0] ? unsigned'~(b) : unsigned'(b);
+   //           assign temp_sum = unsigned'(a) + unsigned'(condinvb) + alucontrol[0]; // added a temp_sum just to ensure sum isn't modified
+   //           assign zero = (temp_sum < 32'b0);
+   //endcase
+
+   // overflow
+   assign overflow = ~(alucontrol[0] ^ a[31] ^ b[31]) & (a[31] ^ sum[31]) & isAddSub;
+   // negative
+   assign negative = sum[31];
+   // Cout  -- lec13 slide 14. the ALU only does addition. add a + b and see if sum < less than either a or b. if so then it carried
+   assign Cout = (sum < (a < 0 ? ~a : a)) || (sum < (b < 0 ? ~b : b)); 
+   // carry
+   assign carry = (alucontrol == 4'b0000 || alucontrol == 4'b0001) && Cout
+   // zero
+   assign zero = (result == 32'b0);
+
+   // lec 13 slide 17
+   assign BGE = (alucontrol == 4'b1101) & ~zero & ~(negative ^ overflow);
+   assign BGEU = (alucontrol == 4'b1111) & ~zero & carry;
+   assign BLT = (alucontrol == 4'b1101) & negative ^ overflow;
+   assign BLTU = (alucontrol == 4'b1111) & ~carry;
+    
+   // forward through to Controller->PCsrc
+   //assign zero = zero | (BGE | BGEU | BLT | BLTU);
+
+   case (alucontrol)
+       4'b1011: assign zero = zero;
+       4'b1101: assign zero = BLT | BGE;
+       4'b1111: assign zero = BLTU | BGEU;
+       default: assign zero = zero;
    endcase
-   assign v = ~(alucontrol[0] ^ a[31] ^ b[31]) & (a[31] ^ sum[31]) & isAddSub;
+
    
 endmodule // alu
 
