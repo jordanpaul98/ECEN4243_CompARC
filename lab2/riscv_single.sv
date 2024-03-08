@@ -410,9 +410,9 @@ module alu (input  logic [31:0] a, b,
    assign zero = (result == 32'b0);
 
    // lec 13 slide 17
-   assign BGE = (alucontrol == 4'b1101) & ~zero & ~(negative ^ overflow);
+   assign BGE =  (alucontrol == 4'b1101) & ~zero & ~(negative ^ overflow);
    assign BGEU = (alucontrol == 4'b1111) & ~zero & carry;
-   assign BLT = (alucontrol == 4'b1101) & negative ^ overflow;
+   assign BLT =  (alucontrol == 4'b1101) & negative ^ overflow;
    assign BLTU = (alucontrol == 4'b1111) & ~carry;
     
    // forward through to Controller->PCsrc
