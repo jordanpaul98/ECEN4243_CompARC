@@ -192,9 +192,9 @@ module aludec (input  logic       opb5,
      case(ALUOp)
        2'b00: ALUControl = 4'b0000; // addition
       //  2'b01: ALUControl = 4'b0001; // subtraction
-       2'b01: if (funct3 == 3'b000 || func3 == 3'b001) // used full funct 3 for clarity code - jordan
+       2'b01: if (funct3 == 3'b000 || funct3 == 3'b001) // used full funct 3 for clarity code - jordan
                   ALUControl = 4'b1011; // subtraction beq/bne
-              else if (func3 == 3'b100 || func3 == 3'b101) // used full funct 3 for clarity code - jordan
+              else if (funct3 == 3'b100 || funct3 == 3'b101) // used full funct 3 for clarity code - jordan
                   ALUControl = 4'b1101; // subtraction blt/bge
               else 
                   ALUControl = 4'b1111; // subtraction bltu/bgeu
@@ -370,7 +370,7 @@ module alu (input  logic [31:0] a, b,
    assign isAddSub = ~alucontrol[2] & ~alucontrol[1] |
                      ~alucontrol[1] & alucontrol[0];   
    assign xorOut = a ^ b;
-   assign sltuOut = unsigned'(a) < ungisned'(b);
+   assign sltuOut = unsigned'(a) < unsigned'(b);
 
    always_comb
      case (alucontrol)
@@ -382,7 +382,7 @@ module alu (input  logic [31:0] a, b,
        4'b0110:  result = a >> b;      // srl  
        4'b0111:  result = a >>> b;     // sra
        4'b0100:  result = xorOut;      // xor  
-       4'b1000   result = a << b;      // sll
+       4'b1000:  result = a << b;      // sll
        4'b1001:  result = sltuOut;     // sltu
        4'b1011:  result = sum;         // beq, bne
        4'b1101:  result = sum;         // blt, bge
@@ -405,9 +405,9 @@ module alu (input  logic [31:0] a, b,
    // Cout  -- lec13 slide 14. the ALU only does addition. add a + b and see if sum < less than either a or b. if so then it carried
    assign Cout = (sum < (a < 0 ? ~a : a)) || (sum < (b < 0 ? ~b : b)); 
    // carry
-   assign carry = (alucontrol == 4'b0000 || alucontrol == 4'b0001) && Cout
+   assign carry = (alucontrol == 4'b0000 || alucontrol == 4'b0001) && Cout;
    // zero
-   assign zero = (result == 32'b0);
+  //  assign zero = (result == 32'b0);
 
    // lec 13 slide 17
    assign BGE =  (alucontrol == 4'b1101) & ~zero & ~(negative ^ overflow);
@@ -417,9 +417,9 @@ module alu (input  logic [31:0] a, b,
     
    // forward through to Controller->PCsrc
    //assign zero = zero | (BGE | BGEU | BLT | BLTU);
-
+   always_comb
    case (alucontrol)
-       4'b1011: assign zero = zero;
+       4'b1011: assign zero = (result == 32'b0);
        4'b1101: assign zero = BLT | BGE;
        4'b1111: assign zero = BLTU | BGEU;
        default: assign zero = zero;
