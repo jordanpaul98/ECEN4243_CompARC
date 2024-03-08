@@ -382,7 +382,7 @@ module alu (input  logic [31:0] a, b,
        4'b0110:  result = a >> b;      // srl  
        4'b0111:  result = a >>> b;     // sra
        4'b0100:  result = xorOut;      // xor  
-       4'b1000   result = a << b;      // sll
+       4'b1000:   result = a << b;      // sll
        4'b1001:  result = sltuOut;     // sltu
        4'b1011:  result = sum;         // beq, bne
        4'b1101:  result = sum;         // blt, bge
@@ -405,7 +405,7 @@ module alu (input  logic [31:0] a, b,
    // Cout  -- lec13 slide 14. the ALU only does addition. add a + b and see if sum < less than either a or b. if so then it carried
    assign Cout = (sum < (a < 0 ? ~a : a)) || (sum < (b < 0 ? ~b : b)); 
    // carry
-   assign carry = (alucontrol == 4'b0000 || alucontrol == 4'b0001) && Cout
+   assign carry = (alucontrol == 4'b0000 || alucontrol == 4'b0001) && Cout;
    // zero
    assign zero = (result == 32'b0);
 
