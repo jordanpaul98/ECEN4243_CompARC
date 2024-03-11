@@ -67,37 +67,35 @@ module testbench();
 
    initial
      begin
-	string memfilename;
+	      string memfilename;
         memfilename = {"./riscvtest/riscvtest.memfile"};
         $readmemh(memfilename, dut.imem.RAM);
      end
 
    
    // initialize test
-   initial
-     begin
-	reset <= 1; # 22; reset <= 0;
-     end
+  initial
+    begin
+	    reset <= 1; # 22; reset <= 0;
+    end
 
    // generate clock to sequence tests
-   always
-     begin
-	clk <= 1; # 5; clk <= 0; # 5;
-     end
+  always begin
+	  clk <= 1; # 5; clk <= 0; # 5;
+  end
 
    // check results
-   always @(negedge clk)
-     begin
-	if(MemWrite) begin
-           if(DataAdr === 100 & WriteData === 25) begin
-              $display("Simulation succeeded");
-              $stop;
-           end else if (DataAdr !== 96) begin
-              $display("Simulation failed");
-              $stop;
-           end
-	end
-     end
+  always @(negedge clk) begin
+	  if(MemWrite) begin
+      if(DataAdr === 100 & WriteData === 25) begin
+        $display("Simulation succeeded");
+        $stop;
+      end else if (DataAdr !== 96) begin
+        $display("Simulation failed");
+        $stop;
+      end
+	  end
+  end
 endmodule // testbench
 
 module riscvsingle (input  logic        clk, reset,
@@ -108,8 +106,9 @@ module riscvsingle (input  logic        clk, reset,
 		    input  logic [31:0] ReadData);
    
    logic 				ALUSrc, RegWrite, Jump, Zero;
-   logic [1:0] 				ResultSrc, ImmSrc;
-   logic [2:0] 				ALUControl;
+   logic [1:0] 				ResultSrc;
+   logic [2:0] 				ImmSrc;
+   logic [3:0] 				ALUControl;
    
    controller c (Instr[6:0], Instr[14:12], Instr[30], Zero,
 		 ResultSrc, MemWrite, PCSrc,
@@ -131,8 +130,8 @@ module controller (input  logic [6:0] op,
 		   output logic       MemWrite,
 		   output logic       PCSrc, ALUSrc,
 		   output logic       RegWrite, Jump,
-		   output logic [1:0] ImmSrc,
-		   output logic [2:0] ALUControl);
+		   output logic [2:0] ImmSrc,
+		   output logic [3:0] ALUControl);
    
    logic [1:0] 			      ALUOp;
    logic 			      Branch;
