@@ -72,3 +72,5 @@
 # ** Warning: (vsim-7) Failed to open readmem file "../riscvtest/riscvtest.memfile" in read mode.
 # No such file or directory. (errno = ENOENT)    : riscv_single.sv(72)
 #    Time: 0 ns  Iteration: 0  Instance: /testbench
+# End time: 16:38:01 on Mar 08,2024, Elapsed time: 0:03:19
+# Errors: 0, Warnings: 5
