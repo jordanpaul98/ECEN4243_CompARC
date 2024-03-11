@@ -13,7 +13,7 @@
 # //
 # do riscv_single.do
 # Model Technology ModelSim SE-64 vlog 2021.3 Compiler 2021.07 Jul 13 2021
-# Start time: 16:34:41 on Mar 08,2024
+# Start time: 11:28:13 on Mar 11,2024
 # vlog -reportprogress 300 riscv_single.sv 
 # -- Compiling module testbench
 # -- Compiling module riscvsingle
@@ -36,10 +36,10 @@
 # Top level modules:
 # 	testbench
 # 	flopenr
-# End time: 16:34:42 on Mar 08,2024, Elapsed time: 0:00:01
+# End time: 11:28:13 on Mar 11,2024, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # vsim -debugdb -voptargs="+acc" work.testbench 
-# Start time: 16:34:42 on Mar 08,2024
+# Start time: 11:28:13 on Mar 11,2024
 # ** Note: (vsim-3812) Design is being optimized...
 # ** Note: (vsim-8611) Generating debug db.
 # ** Note: (vopt-4301) Memory core inferred for signal 'RAM' width=32, depth=256, type=RAM at location riscv_single.sv:350
@@ -69,8 +69,5 @@
 # ** Warning: (vsim-3015) [PCDPC] - Port size (4) does not match connection size (3) for port 'ALUControl'. The port definition is at: riscv_single.sv(227).
 #    Time: 0 ns  Iteration: 0  Instance: /testbench/dut/rv32single/dp File: riscv_single.sv Line: 118
 # ** Note: (vsim-8900) Creating design debug database vsim.dbg.
-# ** Warning: (vsim-7) Failed to open readmem file "../riscvtest/riscvtest.memfile" in read mode.
-# No such file or directory. (errno = ENOENT)    : riscv_single.sv(72)
-#    Time: 0 ns  Iteration: 0  Instance: /testbench
-# End time: 16:38:01 on Mar 08,2024, Elapsed time: 0:03:19
-# Errors: 0, Warnings: 5
+# End time: 11:35:55 on Mar 11,2024, Elapsed time: 0:07:42
+# Errors: 0, Warnings: 4
