@@ -11,10 +11,10 @@ z2
 cModel Technology
 Z0 d/home/spailll/Documents/Spring24/ECEN4243/labs/ECEN4243_CompARC/lab2
 T_opt
-Z1 !s110 1709937282
-V13eKn>SE9nK]D1IQ6RBA=3
+Z1 !s110 1710174493
+V:;B@HAbOl;fb`kVlTWclg0
 04 9 4 work testbench fast 0
-=1-000ae431a4f1-65eb9282-32f85-18110
+=1-000ae431a4f1-65ef311d-664b2-30c5
 !s124 OEM100
 o-quiet -auto_acc_if_foreign -work work -debugdb +acc
 Z2 tCvgOpt 0
@@ -28,7 +28,7 @@ R1
 IBK^W246lNjW]8gm1bU`i_2
 S1
 R0
-Z4 w1709937272
+Z4 w1710174480
 Z5 8riscv_single.sv
 Z6 Friscv_single.sv
 !i122 0
@@ -38,7 +38,7 @@ Z8 OL;L;2021.3;73
 r1
 !s85 0
 31
-Z9 !s108 1709937281.000000
+Z9 !s108 1710174493.000000
 Z10 !s107 riscv_single.sv|
 Z11 !s90 -reportprogress|300|riscv_single.sv|
 !i113 0
@@ -94,7 +94,7 @@ R12
 R2
 vcontroller
 R3
-Z13 !s110 1709937281
+R1
 !i10b 1
 !s100 <^CZKZD3B26j<18P>CCGF0
 IK0KY[5:^^f_b9:^H<X>_k1
@@ -262,7 +262,7 @@ R12
 R2
 vmaindec
 R3
-R13
+R1
 !i10b 1
 !s100 ?HEd]Db`Ad[]chf85Kcmh3
 IB>A?CdQf8InXH@MQa:Tkc1
@@ -358,7 +358,7 @@ R12
 R2
 vriscvsingle
 R3
-R13
+R1
 !i10b 1
 !s100 l6SCUT<BdOh0Y^_MHTFkF2
 ICh3ABI7dE?Y<62zfiOUFF3
@@ -382,10 +382,10 @@ R12
 R2
 vtestbench
 R3
-R13
+R1
 !i10b 1
-!s100 KOHUKe<21GIWmflKmJ5A12
-I<DXeMn?A]lWJhJoLzEY=`2
+!s100 6YBVEDa7:C3mOdoX6U6m03
+In>HM;`4?;o5H`H3]NHIRm0
 S1
 R0
 R4
