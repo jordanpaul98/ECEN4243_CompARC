@@ -11,10 +11,10 @@ z2
 cModel Technology
 Z0 d/home/spailll/Documents/Spring24/ECEN4243/labs/ECEN4243_CompARC/lab2
 T_opt
-!s110 1710177076
-VTRV36gCdQP^?0i43V;b>Z0
+!s110 1710185069
+VVcld3beBi<52@cE8K;NiR3
 04 9 4 work testbench fast 0
-=1-000ae431a4f1-65ef3b34-2843b-3761
+=1-000ae431a4f1-65ef5a6d-1cfb8-3c50
 !s124 OEM100
 o-quiet -auto_acc_if_foreign -work work -debugdb +acc
 Z1 tCvgOpt 0
@@ -22,13 +22,13 @@ n@_opt
 OL;O;2021.3;73
 vadder
 Z2 DXx6 sv_std 3 std 0 22 9oUSJO;AeEaW`l:M@^WG92
-Z3 !s110 1710177075
+Z3 !s110 1710185068
 !i10b 1
 !s100 fM_4CTIhbc7e5Vn>D7fKM0
 IT7nCfDfANU@IU6G>GG4;>2
 S1
 R0
-Z4 w1710177063
+Z4 w1710185060
 Z5 8riscv_single.sv
 Z6 Friscv_single.sv
 !i122 0
@@ -38,7 +38,7 @@ Z8 OL;L;2021.3;73
 r1
 !s85 0
 31
-Z9 !s108 1710177075.000000
+Z9 !s108 1710185068.000000
 Z10 !s107 riscv_single.sv|
 Z11 !s90 -reportprogress|300|riscv_single.sv|
 !i113 0
@@ -48,15 +48,15 @@ valu
 R2
 R3
 !i10b 1
-!s100 c5<4;mVYX`b7ne^1TcaT93
-I=I[=hD>P661DPQbCfkKaG3
+!s100 HgfBUQo33a:0m7WhMR<@X0
+IA[5:C`9VLgVk1N_W7km;E1
 S1
 R0
 R4
 R5
 R6
 !i122 0
-L0 357 72
+L0 357 71
 R7
 R8
 r1
@@ -264,8 +264,8 @@ vmaindec
 R2
 R3
 !i10b 1
-!s100 4_R?ZDi`;YWn208JF0BUR3
-IPPEDWdXN9@9L_f5]mWSfi0
+!s100 2e]1CY20?1z12:J1V_QSO1
+Ifz8HlK7XOBj7zcY:m@_f?2
 S1
 R0
 R4
@@ -336,15 +336,15 @@ vregfile
 R2
 R3
 !i10b 1
-!s100 JXPgj=0K_bd8L4a0Lz4DD3
-IWQYV;67=85DGI5Wle`U4Z1
+!s100 0VC>U8l=Zd^K:V9^1P]VA0
+IEOYS0a<^HZBoK2Kz`MfSA2
 S1
 R0
 R4
 R5
 R6
 !i122 0
-L0 430 20
+L0 429 20
 R7
 R8
 r1

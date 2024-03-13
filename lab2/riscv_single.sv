@@ -152,7 +152,7 @@ module maindec (input  logic [6:0] op,
 		output logic [2:0] ImmSrc,
 		output logic [1:0] ALUOp);
    
-   logic [10:0] 		   controls;
+   logic [11:0] 		   controls;
    
    assign {RegWrite, ImmSrc, ALUSrc, MemWrite,
 	   ResultSrc, Branch, ALUOp, Jump} = controls;
@@ -418,10 +418,9 @@ module alu (input  logic [31:0] a, b,
    //assign zero = zero | (BGE | BGEU | BLT | BLTU);
    always_comb
    case (alucontrol)
-       4'b1011: assign zero = (result == 32'b0);
        4'b1101: assign zero = BLT | BGE;
        4'b1111: assign zero = BLTU | BGEU;
-       default: assign zero = zero;
+       default: assign zero = (result == 32'b0);
    endcase
 
    
