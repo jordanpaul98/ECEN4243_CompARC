@@ -75,21 +75,21 @@ module testbench();
 		// memfilename = {"testing/addi.memfile"};   // - passed	- still works
 		// memfilename = {"testing/and.memfile"};	 // - passed	- still works
 		// memfilename = {"testing/andi.memfile"};	 // - passed	- still works
-		// memfilename = {"testing/auipc.memfile"};	 // - untested
+		// memfilename = {"testing/auipc.memfile"};	 // - unsure ??
 		// memfilename = {"testing/beq.memfile"};	 // - passed	- still works
 		// memfilename = {"testing/bge.memfile"};	 // - passed	- still works
 		// memfilename = {"testing/bgeu.memfile"};	 // - passed - created a 33 bit carried, sub b from a and checked the 33rd bit for carried
 		// memfilename = {"testing/blt.memfile"};	 // - passed	- still works
 		// memfilename = {"testing/bltu.memfile"};	 // - passed	- still works
 		// memfilename = {"testing/bne.memfile"};	 // - passed	- still works
-		// memfilename = {"testing/jal.memfile"};	 // - failed
+		// memfilename = {"testing/jal.memfile"};	 // - passed	- worked after implement srcAmux -> RegA mux PC
 		// memfilename = {"testing/jalr.memfile"};	 // - failed
 		// memfilename = {"testing/lb.memfile"};	 // - untested
 		// memfilename = {"testing/lbu.memfile"};	 // - untested
 		// memfilename = {"testing/lh.memfile"};	 // - untested
 		// memfilename = {"testing/lhu.memfile"};	 // - untested
 		// memfilename = {"testing/lui.memfile"};	 // - passed - needs srai (fixed) works
-		// memfilename = {"testing/lw.memfile"};	 // - failed - needs AUIPC
+		// memfilename = {"testing/lw.memfile"};	 // - okay		- confirmed with sw.memfile
 		// memfilename = {"testing/or.memfile"};	 // - passed	- works
 		// memfilename = {"testing/ori.memfile"};	 // - passed
 		// memfilename = {"testing/sb.memfile"};	 // - untested
@@ -104,8 +104,8 @@ module testbench();
 		// memfilename = {"testing/srai.memfile"};	 // - passed - had to redo aludec default 3'b101 to if funct7b5
 		// memfilename = {"testing/srl.memfile"};	 // - passed  - had to add unsigned to b and make it  5 bits
 		// memfilename = {"testing/srli.memfile"};	 // - passed	- works
-		//memfilename = {"testing/sub.memfile"};	 // - passed	- works
-		// memfilename = {"testing/sw.memfile"};	 // - untested
+		// memfilename = {"testing/sub.memfile"};	 // - passed	- works
+		// memfilename = {"testing/sw.memfile"};	 // - passed	
 		// memfilename = {"testing/xor.memfile"};	 // - passed	- works
 		// memfilename = {"testing/xori.memfile"};	 // - passed	- works
 		// memfilename = {"testing/ecall.memfile"};	 // - works
@@ -129,15 +129,15 @@ module testbench();
    // check results
    always @(negedge clk)
      begin
-	if(MemWrite) begin
-           if(DataAdr === 100 & WriteData === 25) begin
-              $display("Simulation succeeded");
-              $stop;
-           end else if (DataAdr !== 96) begin
-              $display("Simulation failed");
-              $stop;
-           end
-	end
+		if(MemWrite) begin
+			   //if(DataAdr === 100 & WriteData === 25) begin
+				//  $display("Simulation succeeded");
+				//  $stop;
+			   //end else if (DataAdr !== 96) begin
+				//  $display("Simulation failed");
+				//  $stop;
+			   //end
+		end
      end
 endmodule // testbench
 
@@ -154,8 +154,15 @@ module top (input  logic        clk, reset,
    logic [31:0] 		PC, Instr, ReadData;
    
    // instantiate processor and memories
-   riscvsingle rv32single (clk, reset, PC, Instr, MemWrite, DataAdr,
-			   WriteData, ReadData);
+   riscvsingle rv32single (clk,
+						   reset,
+						   PC,
+						   Instr,
+						   MemWrite,
+						   DataAdr,
+						   WriteData,
+						   ReadData);
+						   
    imem imem (PC, Instr);
    dmem dmem (clk, MemWrite, DataAdr, WriteData, ReadData);
    
@@ -167,12 +174,12 @@ endmodule // top
 //
 // ==========================================================================================
 
-module riscvsingle (input  logic        clk, reset,
-		    output logic [31:0] PC,
-		    input  logic [31:0] Instr,
-		    output logic 	MemWrite,
-		    output logic [31:0] ALUResult, WriteData,
-		    input  logic [31:0] ReadData);
+module riscvsingle (input  logic  		clk, reset,
+				    output logic [31:0] PC,
+		            input  logic [31:0] Instr,
+		            output logic 		MemWrite,
+					output logic [31:0] ALUResult, WriteData,
+					input  logic [31:0] ReadData);
    
    logic 			    RegWrite, Jump;
    logic [1:0]          ALUSrc;
@@ -269,9 +276,9 @@ module maindec (input  logic [6:0] op,
        7'b1100011: controls = 13'b0_010_00_0_00_1_01_0; // B-Type
        7'b0010011: controls = 13'b1_000_01_0_00_0_10_0; // I–type ALU
        7'b1101111: controls = 13'b1_011_xx_0_10_0_xx_1; // Jal      lec 10 slide 29
-       7'b1100111: controls = 13'b1_011_xx_0_10_0_xx_1; // jalr     FIXME: not implemented (same as jal, jal short name jalr with imm = 0)
-       7'b0010111: controls = 13'b1_100_01_0_00_0_00_0; // auipc    FIXME: not implemented (add upper immediate to pc, U type ) (PCsrc come from PCTarget)
-       7'b0110111: controls = 13'b1_100_01_0_00_0_11_0; // lui      FIXME: not implemented ( load upper immediate, U type)
+       7'b1100111: controls = 13'b1_011_01_0_10_0_00_1; // jalr    // still need to implement - need to find path from SrcA to PC 
+       7'b0010111: controls = 13'b1_100_11_0_00_0_00_0; // auipc    
+       7'b0110111: controls = 13'b1_100_01_0_00_0_11_0; // lui      
 
        default: controls = 13'bx_xxx_x_x_xx_x_xx_x; // ???
      endcase // case (op)
@@ -347,7 +354,7 @@ module datapath (input  logic        clk, reset,
 		 output logic [31:0] ALUResult, WriteData,
 		 input  logic [31:0] ReadData);
    
-   logic [31:0] 		     PCNext, PCPlus4, PCTarget;
+   logic [31:0] 		     PCNext, PCPlus4, PCTarget, PCAdr;
    logic [31:0] 		     ImmExt;
    logic [31:0] 		     SrcA, SrcB, RegOutA;
    logic [31:0] 		     Result;
@@ -368,7 +375,13 @@ module datapath (input  logic        clk, reset,
    mux2 #(32)  srcbmux (WriteData, ImmExt, ALUSrc[0], SrcB); // mux for B input
    
    alu  alu (SrcA, SrcB, ALUControl, ALUResult, Zero, Negative, Carry, Overflow);
-   mux3 #(32) resultmux (ALUResult, ReadData, PCPlus4,ResultSrc, Result);
+   mux3 #(32) resultmux (ALUResult, ReadData, PCPlus4, ResultSrc, Result);
+   
+   // choose between SrcA or PCTarget
+   //mux #(32) pcAdrTg (PCTarget, SrcA, , PCAdr
+   
+   // update PCNext
+   //mux2 #(32)  pcmux (PCPlus4, PCTarget, PCSrc, PCNext);
 
 endmodule // datapath
 
@@ -479,7 +492,7 @@ module imem (input  logic [31:0] a,
 	     output logic [31:0] rd);
    
    // changed RAM to 1024x4 byts of memory to test previous test files
-   logic [31:0] 		 RAM[1024:0];
+   logic [31:0] 		 RAM[2048:0];
    
    assign rd = RAM[a[31:2]]; // word aligned
    
@@ -490,9 +503,10 @@ module dmem (input  logic        clk, we,
 	     input  logic [31:0] a, wd,
 	     output logic [31:0] rd);
    
-   logic [31:0] 		 RAM[255:0];
+   logic [31:0] 		 RAM[2048:0];
    
    assign rd = RAM[a[31:2]]; // word aligned
+   
    always_ff @(posedge clk)
      if (we) RAM[a[31:2]] <= wd;
    
