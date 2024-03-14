@@ -83,19 +83,19 @@ module testbench();
 		// memfilename = {"testing/bltu.memfile"};	 // - passed	- still works
 		// memfilename = {"testing/bne.memfile"};	 // - passed	- still works
 		// memfilename = {"testing/jal.memfile"};	 // - passed	- worked after implement srcAmux -> RegA mux PC
-		// memfilename = {"testing/jalr.memfile"};	 // - failed
-		// memfilename = {"testing/lb.memfile"};	 // - untested
-		// memfilename = {"testing/lbu.memfile"};	 // - untested
-		// memfilename = {"testing/lh.memfile"};	 // - untested
-		// memfilename = {"testing/lhu.memfile"};	 // - untested
+		// memfilename = {"testing/jalr.memfile"};	 // - passed	- JALR is I-type 
+		// memfilename = {"testing/lb.memfile"};	 // - confirmed with sb
+		// memfilename = {"testing/lbu.memfile"};	 // - passed
+		// memfilename = {"testing/lh.memfile"};	 // - confirmed with sh
+		// memfilename = {"testing/lhu.memfile"};	 // - passed
 		// memfilename = {"testing/lui.memfile"};	 // - passed - needs srai (fixed) works
 		// memfilename = {"testing/lw.memfile"};	 // - okay		- confirmed with sw.memfile
 		// memfilename = {"testing/or.memfile"};	 // - passed	- works
 		// memfilename = {"testing/ori.memfile"};	 // - passed
-		// memfilename = {"testing/sb.memfile"};	 // - untested
-		// memfilename = {"testing/sh.memfile"};	 // - untested
+		// memfilename = {"testing/sb.memfile"};	 // - passed - see note for sh
+		// memfilename = {"testing/sh.memfile"};	 // - passed: -> NOTE: imem and dmem are only local to that module
 		// memfilename = {"testing/sll.memfile"};	 // - passed - had to add unsigned to b and make it 5 bits
-		// memfilename = {"testing/slli.memfile"};	 // - untested
+		// memfilename = {"testing/slli.memfile"};	 // - passed
 		// memfilename = {"testing/slt.memfile"};	 // - passed	- works
 		// memfilename = {"testing/slti.memfile"};	 // - passed	- works
 		// memfilename = {"testing/sltiu.memfile"};	 // - passed	- works
@@ -105,12 +105,13 @@ module testbench();
 		// memfilename = {"testing/srl.memfile"};	 // - passed  - had to add unsigned to b and make it  5 bits
 		// memfilename = {"testing/srli.memfile"};	 // - passed	- works
 		// memfilename = {"testing/sub.memfile"};	 // - passed	- works
-		// memfilename = {"testing/sw.memfile"};	 // - passed	
+		 memfilename = {"testing/sw.memfile"};	 // - passed	
 		// memfilename = {"testing/xor.memfile"};	 // - passed	- works
 		// memfilename = {"testing/xori.memfile"};	 // - passed	- works
 		// memfilename = {"testing/ecall.memfile"};	 // - works
 		
         $readmemh(memfilename, dut.imem.RAM);
+		$readmemh(memfilename, dut.dmem.RAM);
      end
 
    
@@ -164,7 +165,8 @@ module top (input  logic        clk, reset,
 						   ReadData);
 						   
    imem imem (PC, Instr);
-   dmem dmem (clk, MemWrite, DataAdr, WriteData, ReadData);
+   // dont know if i should do this but passing funct3 to dmen, similiar to Wally
+   dmem dmem (clk, MemWrite, DataAdr, WriteData, Instr[14:12], ReadData);
    
 endmodule // top
 
@@ -189,17 +191,17 @@ module riscvsingle (input  logic  		clk, reset,
    logic [3:0] 		    ALUControl;
    
    controller c (Instr[6:0], Instr[14:12], Instr[30],
-		 Zero, Negative, Carry, Overflow,
-		 ResultSrc, MemWrite, PCSrc,
-		 ALUSrc, RegWrite, Jump,
-		 ImmSrc, ALUControl);
+				 Zero, Negative, Carry, Overflow,
+				 ResultSrc, MemWrite, PCSrc,
+				 ALUSrc, RegWrite, Jump,
+				 ImmSrc, ALUControl);
 		 
-   datapath dp (clk, reset, ResultSrc, PCSrc,
-		ALUSrc, RegWrite,
-		ImmSrc, ALUControl,
-		Zero, Negative, Carry, Overflow,
-		PC, Instr,
-		ALUResult, WriteData, ReadData);
+   datapath dp (clk, reset, ResultSrc, PCSrc, Jump,
+				ALUSrc, RegWrite,
+				ImmSrc, ALUControl,
+				Zero, Negative, Carry, Overflow,
+				PC,  Instr,
+				ALUResult, WriteData, ReadData);
    
 endmodule // riscvsingle
 
@@ -210,16 +212,16 @@ endmodule // riscvsingle
 // ==========================================================================================
 
 module controller (input  logic [6:0] op,
-		   input  logic [2:0] funct3,
-		   input  logic       funct7b5,
-		   input  logic       Zero, Negative, Carry, Overflow,
-		   output logic [1:0] ResultSrc,
-		   output logic       MemWrite,
-		   output logic       PCSrc,
+		   input  logic [2:0] 	funct3,
+		   input  logic       	funct7b5,
+		   input  logic       	Zero, Negative, Carry, Overflow,
+		   output logic [1:0] 	ResultSrc,
+		   output logic       	MemWrite,
+		   output logic       	PCSrc,
 		   output  logic [1:0]  ALUSrc,
-		   output logic       RegWrite, Jump,
-		   output logic [2:0] ImmSrc,
-		   output logic [3:0] ALUControl);
+		   output logic       	RegWrite, Jump,
+		   output logic [2:0] 	ImmSrc,
+		   output logic [3:0] 	ALUControl);
    
    logic [1:0] 			  ALUOp;
    logic 			      Branch, BranchTaken;
@@ -276,7 +278,7 @@ module maindec (input  logic [6:0] op,
        7'b1100011: controls = 13'b0_010_00_0_00_1_01_0; // B-Type
        7'b0010011: controls = 13'b1_000_01_0_00_0_10_0; // I–type ALU
        7'b1101111: controls = 13'b1_011_xx_0_10_0_xx_1; // Jal      lec 10 slide 29
-       7'b1100111: controls = 13'b1_011_01_0_10_0_00_1; // jalr    // still need to implement - need to find path from SrcA to PC 
+       7'b1100111: controls = 13'b1_000_01_0_10_0_00_1; // jalr    need to find path from SrcA to PC 
        7'b0010111: controls = 13'b1_100_11_0_00_0_00_0; // auipc    
        7'b0110111: controls = 13'b1_100_01_0_00_0_11_0; // lui      
 
@@ -343,7 +345,7 @@ endmodule // aludec
 
 module datapath (input  logic        clk, reset,
 		 input  logic [1:0]  ResultSrc,
-		 input  logic 	     PCSrc,
+		 input  logic 	     PCSrc, Jump,
 	     input  logic [1:0]  ALUSrc,
 		 input  logic 	     RegWrite,
 		 input  logic [2:0]  ImmSrc,
@@ -363,7 +365,7 @@ module datapath (input  logic        clk, reset,
    flopr #(32) pcreg (clk, reset, PCNext, PC);
    adder  pcadd4 (PC, 32'd4, PCPlus4);
    adder  pcaddbranch (PC, ImmExt, PCTarget);
-   mux2 #(32)  pcmux (PCPlus4, PCTarget, PCSrc, PCNext);
+   //mux2 #(32)  pcmux (PCPlus4, PCTarget, PCSrc, PCNext);
    
    // register file logic
    regfile  rf (clk, RegWrite, Instr[19:15], Instr[24:20],
@@ -375,13 +377,12 @@ module datapath (input  logic        clk, reset,
    mux2 #(32)  srcbmux (WriteData, ImmExt, ALUSrc[0], SrcB); // mux for B input
    
    alu  alu (SrcA, SrcB, ALUControl, ALUResult, Zero, Negative, Carry, Overflow);
+   
    mux3 #(32) resultmux (ALUResult, ReadData, PCPlus4, ResultSrc, Result);
    
-   // choose between SrcA or PCTarget
-   //mux #(32) pcAdrTg (PCTarget, SrcA, , PCAdr
-   
+   mux2 #(32)  pxAddrMux (PCTarget, ALUResult, (Jump & (ALUSrc === 2'b01)), PCAdr);
    // update PCNext
-   //mux2 #(32)  pcmux (PCPlus4, PCTarget, PCSrc, PCNext);
+   mux2 #(32)  pcmux (PCPlus4, PCAdr, PCSrc, PCNext);
 
 endmodule // datapath
 
@@ -492,7 +493,7 @@ module imem (input  logic [31:0] a,
 	     output logic [31:0] rd);
    
    // changed RAM to 1024x4 byts of memory to test previous test files
-   logic [31:0] 		 RAM[2048:0];
+   logic [31:0] 		 RAM[2047:0];
    
    assign rd = RAM[a[31:2]]; // word aligned
    
@@ -501,14 +502,47 @@ endmodule // imem
 
 module dmem (input  logic        clk, we,
 	     input  logic [31:0] a, wd,
+		 input  logic [2:0]  funct3,
 	     output logic [31:0] rd);
    
-   logic [31:0] 		 RAM[2048:0];
+   logic [31:0] 		 RAM[2047:0];
+   logic [31:0] 		 mask, extend_mask, data;
    
-   assign rd = RAM[a[31:2]]; // word aligned
+   logic [1:0] alignment;
+   logic signBit;
+   
+   assign alignment = a[1:0];
+   assign data      = RAM[a[31:2]];
+   assign signBit   = data[8 * alignment + ((funct3 == 3'b001) ? 15 : ((funct3 == 3'b000) ? 7 : 31))];
+   
+   always_comb
+	case(funct3)
+		3'b010:  assign mask = 32'hFFFFFFFF; // load word
+		3'b000:  assign mask = 32'h000000FF << (8 * alignment); // load byte
+				 //assign extend_mask = {{24{signBit}}, {8'hFF}};
+		3'b100:  assign mask = 32'h000000FF << (8 * alignment); // load unsigned byte
+				 //assign extend_mask = {{24{signBit}}, {8'hFF}};
+		3'b001:  assign mask = 32'h0000FFFF << (8 * alignment); // load half
+				 //assign extend_mask = {{16{signBit}}, {16'hFFFF}};
+		3'b101:  assign mask = 32'h0000FFFF << (8 * alignment); // load unsigned half
+				 //assign extend_mask = {{16{signBit}}, {16'hFFFF}};
+		default: assign mask = 32'hFFFFFFFF;
+				 //assign extend_mask = 32'hFFFFFFFF;
+	endcase
+	
+   always_comb
+	case(funct3)
+		3'b000: assign extend_mask = {{24{signBit}}, {8'h00}};
+		//3'b100: assign extend_mask = {{24{1'b0}}, {8'h00}};
+		3'b001: assign extend_mask = {{16{signBit}}, {16'h0000}};
+		//3'b101: assign extend_mask = {{16{1'b0}}, {16'h0000}};
+		default: assign extend_mask = 32'h00000000;
+	endcase
+   
+   assign rd = ((data & mask) >> (8 * alignment)) | extend_mask; // word aligned
    
    always_ff @(posedge clk)
-     if (we) RAM[a[31:2]] <= wd;
+     if (we) RAM[a[31:2]] <= ((wd << (8 * alignment)) & mask) | (data & (~mask));
    
 endmodule // dmem
 
