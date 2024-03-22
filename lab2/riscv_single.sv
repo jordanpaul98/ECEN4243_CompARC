@@ -69,7 +69,7 @@ module testbench();
      begin
 	string memfilename;
         // memfilename = {"riscvtest/riscvtest.memfile"};
-		// memfilename = {"riscvtest/fib.memfile"};
+	    // memfilename = {"riscvtest/fib.memfile"};
 		
 		// memfilename = {"testing/add.memfile"};	 // - passed	- still works
 		// memfilename = {"testing/addi.memfile"};   // - passed	- still works
@@ -95,7 +95,7 @@ module testbench();
 		// memfilename = {"testing/sb.memfile"};	 // - passed - see note for sh
 		// memfilename = {"testing/sh.memfile"};	 // - passed: -> NOTE: imem and dmem are only local to that module
 		// memfilename = {"testing/sll.memfile"};	 // - passed - had to add unsigned to b and make it 5 bits
-		// memfilename = {"testing/slli.memfile"};	 // - passed
+		 memfilename = {"testing/slli.memfile"};	 // - passed
 		// memfilename = {"testing/slt.memfile"};	 // - passed	- works
 		// memfilename = {"testing/slti.memfile"};	 // - passed	- works
 		// memfilename = {"testing/sltiu.memfile"};	 // - passed	- works
@@ -105,7 +105,7 @@ module testbench();
 		// memfilename = {"testing/srl.memfile"};	 // - passed  - had to add unsigned to b and make it  5 bits
 		// memfilename = {"testing/srli.memfile"};	 // - passed	- works
 		// memfilename = {"testing/sub.memfile"};	 // - passed	- works
-		 memfilename = {"testing/sw.memfile"};	 // - passed	
+		// memfilename = {"testing/sw.memfile"};	 // - passed	
 		// memfilename = {"testing/xor.memfile"};	 // - passed	- works
 		// memfilename = {"testing/xori.memfile"};	 // - passed	- works
 		// memfilename = {"testing/ecall.memfile"};	 // - works
@@ -321,7 +321,13 @@ module aludec (input  logic     opb5,
 		                 ALUControl = 4'b0001; // sub
 		            else
 		                 ALUControl = 4'b0000; // add, addi
-		    3'b010:   ALUControl = 4'b0101; // slt, slti
+		    3'b010:   if (!RtypeSub) // I type set les than
+						  ALUControl = 4'b0101; // slt, slti
+					  else
+						  if (!funct7b5)
+							 ALUControl = 4'b0101; // slt
+						  else
+							 ALUControl = 4'b1010; // sgt
 		    3'b110:   ALUControl = 4'b0011; // or, ori
 		    3'b111:   ALUControl = 4'b0010; // and, andi
             3'b100:   ALUControl = 4'b0100; // xor, xori
@@ -330,7 +336,13 @@ module aludec (input  logic     opb5,
                     else
                          ALUControl = 4'b0110; // srl, srli
             3'b001:   ALUControl = 4'b1000; // sll, slli
-            3'b011:   ALUControl = 4'b1001; // sltu, sltiu
+            3'b011:   if (!RtypeSub) // I type
+						ALUControl = 4'b1001; // sltiu
+					  else // R type
+						if (!funct7b5)
+							ALUControl = 4'b1001; // sltu
+						else
+							ALUControl = 4'b1100;
 		    default:  ALUControl = 4'bxxxx; // ???
 		   endcase // case (funct3)       
      endcase // case (ALUOp)
@@ -586,6 +598,8 @@ module alu (input  logic [31:0] a, b,
        4'b1101:  result = sum;         // blt, bge
        4'b1111:  result = sum;         // bltu, bgeu
 	   4'b1110:  result = b;		   // LUI
+	   4'b1010:  result = ~(sum[31] ^ overflow); // sgt
+	   4'b1100:  result = ~sltuOut;    // sgtu
        default:  result = 32'bx;
      endcase
 
