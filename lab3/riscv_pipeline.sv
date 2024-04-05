@@ -123,6 +123,10 @@ module testbench();
      end
 endmodule
 
+// ========================================================================
+//  TOP
+// ========================================================================
+
 module top(input  logic        clk, reset, 
            output logic [31:0] WriteDataM, DataAdrM, 
            output logic        MemWriteM);
@@ -137,25 +141,29 @@ module top(input  logic        clk, reset,
    
 endmodule
 
-module riscv(input  logic        clk, reset,
-             output logic [31:0] PCF,
-             input logic [31:0]  InstrF,
-             output logic 	 MemWriteM,
-             output logic [31:0] ALUResultM, WriteDataM,
-             input logic [31:0]  ReadDataM);
+// ========================================================================
+//  RISCV
+// ========================================================================
 
-   logic [6:0] 			 opD;
-   logic [2:0] 			 funct3D;
-   logic 			 funct7b5D;
-   logic [1:0] 			 ImmSrcD;
-   logic 			 ZeroE;
-   logic 			 PCSrcE;
-   logic [2:0] 			 ALUControlE;
-   logic 			 ALUSrcE;
-   logic 			 ResultSrcEb0;
-   logic 			 RegWriteM;
-   logic [1:0] 			 ResultSrcW;
-   logic 			 RegWriteW;
+module riscv(input  logic         clk, reset,
+             output logic [31:0]  PCF,
+             input  logic [31:0]  InstrF,
+             output logic 	      MemWriteM,
+             output logic [31:0]  ALUResultM, WriteDataM,
+             input  logic [31:0]  ReadDataM);
+
+   logic [6:0] 		opD;
+   logic [2:0] 		funct3D;
+   logic 			    funct7b5D;
+   logic [2:0] 		ImmSrcD;
+   logic 			    ZeroE;
+   logic 			    PCSrcE;
+   logic [2:0] 		ALUControlE;
+   logic 			    ALUSrcE;
+   logic 			    ResultSrcEb0;
+   logic 			    RegWriteM;
+   logic [1:0] 		ResultSrcW;
+   logic 			    RegWriteW;
 
    logic [1:0] 			 ForwardAE, ForwardBE;
    logic 			 StallF, StallD, FlushD, FlushE;
@@ -181,16 +189,19 @@ module riscv(input  logic        clk, reset,
               ForwardAE, ForwardBE, StallF, StallD, FlushD, FlushE);			 
 endmodule
 
+// ========================================================================
+//  CONTROLLER (c)
+// ========================================================================
 
 module controller(input  logic		 clk, reset,
                   // Decode stage control signals
-                  input logic [6:0]  opD,
-                  input logic [2:0]  funct3D,
-                  input logic 	     funct7b5D,
-                  output logic [1:0] ImmSrcD,
+                  input  logic [6:0] opD,
+                  input  logic [2:0] funct3D,
+                  input  logic 	     funct7b5D,
+                  output logic [2:0] ImmSrcD,
                   // Execute stage control signals
-                  input logic 	     FlushE, 
-                  input logic 	     ZeroE, 
+                  input  logic 	     FlushE, 
+                  input  logic 	     ZeroE, 
                   output logic 	     PCSrcE, // for datapath and Hazard Unit
                   output logic [2:0] ALUControlE, 
                   output logic 	     ALUSrcE,
@@ -203,13 +214,13 @@ module controller(input  logic		 clk, reset,
                   output logic [1:0] ResultSrcW);
 
    // pipelined control signals
-   logic 			     RegWriteD, RegWriteE;
-   logic [1:0] 			     ResultSrcD, ResultSrcE, ResultSrcM;
-   logic 			     MemWriteD, MemWriteE;
-   logic 			     JumpD, JumpE;
-   logic 			     BranchD, BranchE;
-   logic [1:0] 			     ALUOpD;
-   logic [2:0] 			     ALUControlD;
+   logic 			     RegWriteD,  RegWriteE;
+   logic [1:0] 		 ResultSrcD, ResultSrcE, ResultSrcM;
+   logic 			     MemWriteD,  MemWriteE;
+   logic 			     JumpD,      JumpE;
+   logic 			     BranchD,    BranchE;
+   logic [1:0] 		 ALUOpD;
+   logic [2:0] 		 ALUControlD;
    logic 			     ALUSrcD;
    
    // Decode stage logic
@@ -236,15 +247,22 @@ module controller(input  logic		 clk, reset,
                           {RegWriteW, ResultSrcW});     
 endmodule
 
+// ========================================================================
+//  MAINDEC
+// ========================================================================
+
 module maindec(input  logic [6:0] op,
                output logic [1:0] ResultSrc,
-               output logic 	  MemWrite,
-               output logic 	  Branch, ALUSrc,
-               output logic 	  RegWrite, Jump,
-               output logic [1:0] ImmSrc,
+               output logic 	    MemWrite,
+               output logic 	    Branch, ALUSrc,
+               output logic 	    RegWrite, Jump,
+               output logic [2:0] ImmSrc,
                output logic [1:0] ALUOp);
 
-   logic [10:0] 		  controls;
+   // Change-Note:
+   // increased ImmSrc to 3 bits. extended controls by 1 bit
+
+   logic [11:0] 		  controls;
 
    assign {RegWrite, ImmSrc, ALUSrc, MemWrite,
            ResultSrc, Branch, ALUOp, Jump} = controls;
@@ -252,22 +270,26 @@ module maindec(input  logic [6:0] op,
    always_comb
      case(op)
        // RegWrite_ImmSrc_ALUSrc_MemWrite_ResultSrc_Branch_ALUOp_Jump
-       7'b0000011: controls = 11'b1_00_1_0_01_0_00_0; // lw
-       7'b0100011: controls = 11'b0_01_1_1_00_0_00_0; // sw
-       7'b0110011: controls = 11'b1_xx_0_0_00_0_10_0; // R-type 
-       7'b1100011: controls = 11'b0_10_0_0_00_1_01_0; // beq
-       7'b0010011: controls = 11'b1_00_1_0_00_0_10_0; // I-type ALU
-       7'b1101111: controls = 11'b1_11_0_0_10_0_00_1; // jal
-       7'b0000000: controls = 11'b0_00_0_0_00_0_00_0; // need valid values at reset
-       default:    controls = 11'bx_xx_x_x_xx_x_xx_x; // non-implemented instruction
+       7'b0000011: controls = 12'b1_000_1_0_01_0_00_0; // lw
+       7'b0100011: controls = 12'b0_001_1_1_00_0_00_0; // sw
+       7'b0110011: controls = 12'b1_xxx_0_0_00_0_10_0; // R-type 
+       7'b1100011: controls = 12'b0_010_0_0_00_1_01_0; // beq
+       7'b0010011: controls = 12'b1_000_1_0_00_0_10_0; // I-type ALU
+       7'b1101111: controls = 12'b1_011_0_0_10_0_00_1; // jal
+       7'b0000000: controls = 12'b0_000_0_0_00_0_00_0; // need valid values at reset
+       default:    controls = 12'bx_xx_x_x_xx_x_xx_x; // non-implemented instruction
      endcase
 endmodule
 
-module aludec(input  logic       opb5,
-              input logic [2:0]  funct3,
-              input logic 	 funct7b5, 
-              input logic [1:0]  ALUOp,
-              output logic [2:0] ALUControl);
+// ========================================================================
+//  ALUDEC
+// ========================================================================
+
+module aludec(input  logic        opb5,
+              input  logic [2:0]  funct3,
+              input  logic 	      funct7b5, 
+              input  logic [1:0]  ALUOp,
+              output logic [2:0]  ALUControl);
 
    logic 			 RtypeSub;
    assign RtypeSub = funct7b5 & opb5;  // TRUE for R-type subtract instruction
@@ -289,31 +311,35 @@ module aludec(input  logic       opb5,
      endcase
 endmodule
 
-module datapath(input logic clk, reset,
+// ========================================================================
+//  DATAPATH (dp)
+// ========================================================================
+
+module datapath(input  logic        clk, reset,
                 // Fetch stage signals
-                input logic 	    StallF,
+                input  logic 	      StallF,
                 output logic [31:0] PCF,
-                input logic [31:0]  InstrF,
+                input  logic [31:0] InstrF,
                 // Decode stage signals
                 output logic [6:0]  opD,
                 output logic [2:0]  funct3D, 
-                output logic 	    funct7b5D,
-                input logic 	    StallD, FlushD,
-                input logic [1:0]   ImmSrcD,
+                output logic 	      funct7b5D,
+                input  logic 	      StallD, FlushD,
+                input  logic [2:0]  ImmSrcD,
                 // Execute stage signals
-                input logic 	    FlushE,
-                input logic [1:0]   ForwardAE, ForwardBE,
-                input logic 	    PCSrcE,
-                input logic [2:0]   ALUControlE,
-                input logic 	    ALUSrcE,
-                output logic 	    ZeroE,
+                input  logic 	      FlushE,
+                input  logic [1:0]  ForwardAE, ForwardBE,
+                input  logic 	      PCSrcE,
+                input  logic [2:0]  ALUControlE,
+                input  logic 	      ALUSrcE,
+                output logic 	      ZeroE,
                 // Memory stage signals
-                input logic 	    MemWriteM, 
+                input  logic 	      MemWriteM, 
                 output logic [31:0] WriteDataM, ALUResultM,
-                input logic [31:0]  ReadDataM,
+                input  logic [31:0] ReadDataM,
                 // Writeback stage signals
-                input logic 	    RegWriteW, 
-                input logic [1:0]   ResultSrcW,
+                input  logic 	      RegWriteW, 
+                input  logic [1:0]  ResultSrcW,
                 // Hazard Unit signals 
                 output logic [4:0]  Rs1D, Rs2D, Rs1E, Rs2E,
                 output logic [4:0]  RdE, RdM, RdW);
@@ -384,12 +410,16 @@ module datapath(input logic clk, reset,
    mux3   #(32)  resultmux(ALUResultW, ReadDataW, PCPlus4W, ResultSrcW, ResultW);	
 endmodule
 
+// ========================================================================
+//  HAZARD UNIT
+// ========================================================================
+
 // Hazard Unit: forward, stall, and flush
 module hazard(input  logic [4:0] Rs1D, Rs2D, Rs1E, Rs2E, RdE, RdM, RdW,
-              input logic 	 PCSrcE, ResultSrcEb0, 
-              input logic 	 RegWriteM, RegWriteW,
+              input  logic 	     PCSrcE, ResultSrcEb0, 
+              input  logic 	     RegWriteM, RegWriteW,
               output logic [1:0] ForwardAE, ForwardBE,
-              output logic 	 StallF, StallD, FlushD, FlushE);
+              output logic 	     StallF, StallD, FlushD, FlushE);
 
    logic 			 lwStallD;
    
@@ -414,11 +444,15 @@ module hazard(input  logic [4:0] Rs1D, Rs2D, Rs1E, Rs2E, RdE, RdM, RdW,
    assign FlushE = lwStallD | PCSrcE;
 endmodule
 
-module regfile(input  logic        clk, 
-               input logic 	   we3, 
-               input logic [ 4:0]  a1, a2, a3, 
-               input logic [31:0]  wd3, 
-               output logic [31:0] rd1, rd2);
+// ========================================================================
+//  REGFILE
+// ========================================================================
+
+module regfile(input  logic         clk, 
+               input  logic 	      we3, 
+               input  logic [ 4:0]  a1, a2, a3, 
+               input  logic [31:0]  wd3, 
+               output logic [31:0]  rd1, rd2);
 
    logic [31:0] 		   rf[31:0];
 
@@ -435,16 +469,24 @@ module regfile(input  logic        clk,
    assign rd2 = (a2 != 0) ? rf[a2] : 0;
 endmodule
 
+// ========================================================================
+//  ADDER
+// ========================================================================
+
 module adder(input  [31:0] a, b,
              output [31:0] y);
 
    assign y = a + b;
 endmodule
 
+// ========================================================================
+//  EXTEND (ext)
+// ========================================================================
+
 module extend(input  logic [31:7] instr,
-              input logic [1:0]   immsrc,
+              input  logic [2:0]  immsrc,
               output logic [31:0] immext);
-   
+   // added U-Type extension: Need to increase immsrc to 3 bits
    always_comb
      case(immsrc) 
        // I-type 
@@ -455,9 +497,15 @@ module extend(input  logic [31:7] instr,
        2'b10:   immext = {{20{instr[31]}}, instr[7], instr[30:25], instr[11:8], 1'b0}; 
        // J-type (jal)
        2'b11:   immext = {{12{instr[31]}}, instr[19:12], instr[20], instr[30:21], 1'b0}; 
+       // U−type (lui, auipc)
+       3'b100: immext = {instr[31:12], 12'b0};
        default: immext = 32'bx; // undefined
      endcase             
 endmodule
+
+// ========================================================================
+//  FLOPR (Flip flop)
+// ========================================================================
 
 module flopr #(parameter WIDTH = 8)
    (input  logic             clk, reset,
@@ -469,6 +517,10 @@ module flopr #(parameter WIDTH = 8)
      else       q <= d;
 endmodule
 
+// ========================================================================
+//  FLOPENR (flip flop w/ enable)
+// ========================================================================
+
 module flopenr #(parameter WIDTH = 8)
    (input  logic             clk, reset, en,
     input logic [WIDTH-1:0]  d, 
@@ -478,6 +530,10 @@ module flopenr #(parameter WIDTH = 8)
      if (reset)   q <= 0;
      else if (en) q <= d;
 endmodule
+
+// ========================================================================
+//  FLOPENRC (flip flop w/ enable and clear)
+// ========================================================================
 
 module flopenrc #(parameter WIDTH = 8)
    (input  logic             clk, reset, clear, en,
@@ -490,6 +546,10 @@ module flopenrc #(parameter WIDTH = 8)
        if (clear) q <= 0;
        else       q <= d;
 endmodule
+
+// ========================================================================
+//  FLOPRC (flip flop w/ clear)
+// ========================================================================
 
 module floprc #(parameter WIDTH = 8)
    (input  logic clk,
@@ -505,6 +565,10 @@ module floprc #(parameter WIDTH = 8)
        else       q <= d;
 endmodule
 
+// ========================================================================
+//  MUX2 (two input MUX)
+// ========================================================================
+
 module mux2 #(parameter WIDTH = 8)
    (input  logic [WIDTH-1:0] d0, d1, 
     input logic 	     s, 
@@ -512,6 +576,10 @@ module mux2 #(parameter WIDTH = 8)
 
    assign y = s ? d1 : d0; 
 endmodule
+
+// ========================================================================
+//  MUX3 (three input MUX)
+// ========================================================================
 
 module mux3 #(parameter WIDTH = 8)
    (input  logic [WIDTH-1:0] d0, d1, d2,
@@ -521,6 +589,10 @@ module mux3 #(parameter WIDTH = 8)
    assign y = s[1] ? d2 : (s[0] ? d1 : d0); 
 endmodule
 
+// ========================================================================
+//  IMEM (Intrustion memory)
+// ========================================================================
+
 module imem (input  logic [31:0] a,
 	     output logic [31:0] rd);
    
@@ -529,6 +601,10 @@ module imem (input  logic [31:0] a,
    assign rd = RAM[a[31:2]]; // word aligned
    
 endmodule // imem
+
+// ========================================================================
+//  DMEM (Data memory)
+// ========================================================================
 
 module dmem (input  logic        clk, we,
 	     input  logic [31:0] a, wd,
@@ -541,6 +617,10 @@ module dmem (input  logic        clk, we,
      if (we) RAM[a[31:2]] <= wd;
    
 endmodule // dmem
+
+// ========================================================================
+//  ALU (Arthmetic Logic Unit)
+// ========================================================================
 
 module alu(input  logic [31:0] a, b,
            input logic [2:0]   alucontrol,
