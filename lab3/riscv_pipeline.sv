@@ -93,6 +93,44 @@ module testbench();
      begin
 	string memfilename;
         memfilename = {"../riscvtest/riscvtest.memfile"};
+        // memfilename = {"testing/add.memfile"};
+        // memfilename = {"testing/addi.memfile"};
+        // memfilename = {"testing/and.memfile"};	
+        // memfilename = {"testing/andi.memfile"};
+        // memfilename = {"testing/auipc.memfile"};
+        // memfilename = {"testing/beq.memfile"};
+        // memfilename = {"testing/bge.memfile"};
+        // memfilename = {"testing/bgeu.memfile"};
+        // memfilename = {"testing/blt.memfile"};
+        // memfilename = {"testing/bltu.memfile"};
+        // memfilename = {"testing/bne.memfile"};	
+        // memfilename = {"testing/jal.memfile"};	
+        // memfilename = {"testing/jalr.memfile"};
+        // memfilename = {"testing/lb.memfile"};	
+        // memfilename = {"testing/lbu.memfile"};	
+        // memfilename = {"testing/lh.memfile"};
+        // memfilename = {"testing/lhu.memfile"};	
+        // memfilename = {"testing/lui.memfile"};
+        // memfilename = {"testing/lw.memfile"};
+        // memfilename = {"testing/or.memfile"};
+        // memfilename = {"testing/ori.memfile"};
+        // memfilename = {"testing/sb.memfile"};
+        // memfilename = {"testing/sh.memfile"};
+        // memfilename = {"testing/sll.memfile"};	
+        // memfilename = {"testing/slli.memfile"};	
+        // memfilename = {"testing/slt.memfile"};
+        // memfilename = {"testing/slti.memfile"};
+        // memfilename = {"testing/sltiu.memfile"};
+        // memfilename = {"testing/sltu.memfile"};
+        // memfilename = {"testing/sra.memfile"};
+        // memfilename = {"testing/srai.memfile"};
+        // memfilename = {"testing/srl.memfile"};
+        // memfilename = {"testing/srli.memfile"};
+        // memfilename = {"testing/sub.memfile"};
+        // memfilename = {"testing/sw.memfile"};
+        // memfilename = {"testing/xor.memfile"};
+        // memfilename = {"testing/xori.memfile"};
+        // memfilename = {"testing/ecall.memfile"};
 	$readmemh(memfilename, dut.imem.RAM);
      end
    
@@ -171,15 +209,15 @@ module riscv(input  logic         clk, reset,
    logic [4:0] 			 Rs1D, Rs2D, Rs1E, Rs2E, RdE, RdM, RdW;
    
    controller c(clk, reset,
-		opD, funct3D, funct7b5D, ImmSrcD,
-		FlushE, ZeroE, PCSrcE, ALUControlE, ALUSrcE, ResultSrcEb0,
-		MemWriteM, RegWriteM, 
-		RegWriteW, ResultSrcW);
+                opD, funct3D, funct7b5D, ImmSrcD,
+                FlushE, ZeroE, PCSrcE, ALUControlE, ALUSrcE, ResultSrcEb0,
+                MemWriteM, RegWriteM, 
+                RegWriteW, ResultSrcW);
 
    datapath dp(clk, reset,
                StallF, PCF, InstrF,
-	       opD, funct3D, funct7b5D, StallD, FlushD, ImmSrcD,
-	       FlushE, ForwardAE, ForwardBE, PCSrcE, ALUControlE, ALUSrcE, ZeroE,
+	             opD, funct3D, funct7b5D, StallD, FlushD, ImmSrcD,
+	             FlushE, ForwardAE, ForwardBE, PCSrcE, ALUControlE, ALUSrcE, ZeroE,
                MemWriteM, WriteDataM, ALUResultM, ReadDataM,
                RegWriteW, ResultSrcW,
                Rs1D, Rs2D, Rs1E, Rs2E, RdE, RdM, RdW);
@@ -261,6 +299,8 @@ module maindec(input  logic [6:0] op,
 
    // Change-Note:
    // increased ImmSrc to 3 bits. extended controls by 1 bit
+   //
+   // TODO: increate ALUSrc to 2 bits.
 
    logic [11:0] 		  controls;
 
@@ -277,7 +317,9 @@ module maindec(input  logic [6:0] op,
        7'b0010011: controls = 12'b1_000_1_0_00_0_10_0; // I-type ALU
        7'b1101111: controls = 12'b1_011_0_0_10_0_00_1; // jal
        7'b0000000: controls = 12'b0_000_0_0_00_0_00_0; // need valid values at reset
-       default:    controls = 12'bx_xx_x_x_xx_x_xx_x; // non-implemented instruction
+       //7'b0010111: controls = 13'b1_100_11_0_00_0_00_0; // auipc    
+       //7'b0110111: controls = 13'b1_100_01_0_00_0_11_0; // lui 
+       default:    controls = 12'bx_xx_x_x_xx_x_xx_x;  // non-implemented instruction
      endcase
 endmodule
 
