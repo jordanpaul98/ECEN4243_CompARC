@@ -92,7 +92,7 @@ module testbench();
    initial
      begin
 	string memfilename;
-        memfilename = {"../riscvtest/riscvtest.memfile"};
+        memfilename = {"../programs/riscvtest.memfile"};
         // memfilename = {"testing/add.memfile"};
         // memfilename = {"testing/addi.memfile"};
         // memfilename = {"testing/and.memfile"};	
