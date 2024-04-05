@@ -339,35 +339,16 @@ module aludec(input  logic        opb5,
      case(ALUOp)
        2'b00:                ALUControl = 4'b0000; // addition
        2'b01:                ALUControl = 4'b0001; // subtraction
-       default: case(funct3) // R–type or I–type ALU
-          3'b000: if (RtypeSub)
-                      ALUControl = 4'b0001; // sub
-                  else
-                      ALUControl = 4'b0000; // add, addi
-          3'b010:   if (!RtypeSub) // I type set les than
-                ALUControl = 4'b0101; // slt, slti
-              else
-                if (!funct7b5)
-                ALUControl = 4'b0101; // slt
-                else
-                ALUControl = 4'b1010; // sgt
-          3'b110:   ALUControl = 4'b0011; // or, ori
-          3'b111:   ALUControl = 4'b0010; // and, andi
-              3'b100:   ALUControl = 4'b0100; // xor, xori
-              3'b101: if (funct7b5)   
-                          ALUControl = 4'b0111; // sra, srai
-                      else
-                          ALUControl = 4'b0110; // srl, srli
-              3'b001:   ALUControl = 4'b1000; // sll, slli
-              3'b011:   if (!RtypeSub) // I type
-              ALUControl = 4'b1001; // sltiu
-              else // R type
-              if (!funct7b5)
-                ALUControl = 4'b1001; // sltu
-              else
-                ALUControl = 4'b1100;
-		    default:  ALUControl = 4'bxxxx; // ???
-		   endcase // case (funct3)   
+       default: case(funct3) // R-type or I-type ALU
+                  3'b000:  if (RtypeSub) 
+                    ALUControl = 4'b0001; // sub
+                  else          
+                    ALUControl = 4'b0000; // add, addi
+                  3'b010:    ALUControl = 4'b0101; // slt, slti
+                  3'b110:    ALUControl = 4'b0011; // or, ori
+                  3'b111:    ALUControl = 4'b0010; // and, andi
+                  default:   ALUControl = 4'bxxxx; // ???
+		endcase
      endcase
 endmodule
 
