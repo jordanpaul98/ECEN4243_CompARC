@@ -11,10 +11,10 @@ z2
 cModel Technology
 Z0 dF:/ECEN4243_CompARC/lab3
 T_opt
-!s110 1712350915
-V^H5_BF<:QeBV5oE^0>>IT2
+!s110 1712351934
+VzXgBKAzl:IhRb:h]j4P__3
 04 9 4 work testbench fast 0
-=1-00be4390592b-661066c2-42-4e5c
+=1-00be4390592b-66106abc-22f-9bc
 !s124 OEM100
 o-quiet -auto_acc_if_foreign -work work -debugdb +acc
 Z1 tCvgOpt 0
@@ -22,13 +22,13 @@ n@_opt
 OL;O;2021.3;73
 vadder
 Z2 DXx6 sv_std 3 std 0 22 9oUSJO;AeEaW`l:M@^WG92
-Z3 !s110 1712350913
+Z3 !s110 1712351932
 !i10b 1
 !s100 _6=HeiNm`]g::JHh8Tl`Y2
 IRgVAEIoB[@EEAN`77ZDNn2
 S1
 R0
-Z4 w1712350906
+Z4 w1712351920
 Z5 8riscv_pipelined.sv
 Z6 Friscv_pipelined.sv
 !i122 0
@@ -38,7 +38,7 @@ Z8 OL;L;2021.3;73
 r1
 !s85 0
 31
-Z9 !s108 1712350913.000000
+Z9 !s108 1712351931.000000
 Z10 !s107 riscv_pipelined.sv|
 Z11 !s90 -reportprogress|300|riscv_pipelined.sv|
 !i113 0
@@ -454,7 +454,7 @@ R12
 R1
 vtestbench
 R2
-R3
+!s110 1712351931
 !i10b 1
 !s100 oEU_PReU`8kEX7H;GOAa:2
 IG5fEj0Y`ejzK3k2E_KaB61

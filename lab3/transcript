@@ -13,7 +13,7 @@
 # //
 # do riscv_pipelined.do
 # Model Technology ModelSim SE-64 vlog 2021.3 Compiler 2021.07 Jul 13 2021
-# Start time: 16:01:53 on Apr 05,2024
+# Start time: 16:18:51 on Apr 05,2024
 # vlog -reportprogress 300 riscv_pipelined.sv 
 # -- Compiling module testbench
 # -- Compiling module top
@@ -38,10 +38,10 @@
 # 
 # Top level modules:
 # 	testbench
-# End time: 16:01:53 on Apr 05,2024, Elapsed time: 0:00:00
+# End time: 16:18:52 on Apr 05,2024, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 0
 # vsim -debugdb -voptargs="+acc" work.testbench 
-# Start time: 16:01:53 on Apr 05,2024
+# Start time: 16:18:52 on Apr 05,2024
 # ** Note: (vsim-3812) Design is being optimized...
 # ** Note: (vsim-8611) Generating debug db.
 # ** Note: (vopt-4301) Memory core inferred for signal 'RAM' width=32, depth=256, type=RAM at location riscv_pipelined.sv:654
@@ -84,5 +84,5 @@
 # Debug data file does not match loaded design.
 #     while executing
 # "add schematic -full sim:/testbench/dut/rv32pipe"
-# End time: 16:02:31 on Apr 05,2024, Elapsed time: 0:00:38
+# End time: 16:22:01 on Apr 05,2024, Elapsed time: 0:03:09
 # Errors: 2, Warnings: 2
