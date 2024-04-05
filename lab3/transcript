@@ -1,10 +1,9 @@
-# //  Questa Sim-64
-# //  Version 2021.3_1 linux_x86_64 Aug 15 2021
+# //  ModelSim SE-64 2021.3 Jul 13 2021
 # //
 # //  Copyright 1991-2021 Mentor Graphics Corporation
 # //  All Rights Reserved.
 # //
-# //  QuestaSim and its associated documentation contain trade
+# //  ModelSim SE-64 and its associated documentation contain trade
 # //  secrets and commercial or financial information that are the property of
 # //  Mentor Graphics Corporation and are privileged, confidential,
 # //  and exempt from disclosure under the Freedom of Information Act,
@@ -13,11 +12,8 @@
 # //  18 U.S.C. Section 1905.
 # //
 # do riscv_pipelined.do
-# ** Warning: (vdel-134) Unable to remove locked optimized design "_opt".  Locker is jstine@sakuya.ecen.okstate.edu.
-# ** Warning: (vlib-34) Library already exists at "work".
-# Errors: 0, Warnings: 1
-# QuestaSim-64 vlog 2021.3_1 Compiler 2021.08 Aug 15 2021
-# Start time: 07:40:44 on Apr 10,2023
+# Model Technology ModelSim SE-64 vlog 2021.3 Compiler 2021.07 Jul 13 2021
+# Start time: 16:01:53 on Apr 05,2024
 # vlog -reportprogress 300 riscv_pipelined.sv 
 # -- Compiling module testbench
 # -- Compiling module top
@@ -42,13 +38,13 @@
 # 
 # Top level modules:
 # 	testbench
-# End time: 07:40:45 on Apr 10,2023, Elapsed time: 0:00:01
+# End time: 16:01:53 on Apr 05,2024, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # vsim -debugdb -voptargs="+acc" work.testbench 
-# Start time: 07:40:45 on Apr 10,2023
+# Start time: 16:01:53 on Apr 05,2024
 # ** Note: (vsim-3812) Design is being optimized...
 # ** Note: (vsim-8611) Generating debug db.
-# ** Note: (vopt-4301) Memory core inferred for signal 'RAM' width=32, depth=256, type=RAM at location riscv_pipelined.sv:537
+# ** Note: (vopt-4301) Memory core inferred for signal 'RAM' width=32, depth=256, type=RAM at location riscv_pipelined.sv:654
 # Loading sv_std.std
 # Loading work.testbench(fast)
 # Loading work.top(fast)
@@ -73,11 +69,20 @@
 # Loading work.hazard(fast)
 # Loading work.imem(fast)
 # Loading work.dmem(fast)
+# ** Warning: (vsim-3015) [PCDPC] - Port size (10) does not match connection size (11) for port 'd'. The port definition is at: riscv_pipelined.sv(599).
+#    Time: 0 ns  Iteration: 0  Instance: /testbench/dut/rv32pipe/c/controlregE File: riscv_pipelined.sv Line: 270
+# ** Warning: (vsim-3015) [PCDPC] - Port size (10) does not match connection size (11) for port 'q'. The port definition is at: riscv_pipelined.sv(600).
+#    Time: 0 ns  Iteration: 0  Instance: /testbench/dut/rv32pipe/c/controlregE File: riscv_pipelined.sv Line: 270
 # ** Note: (vsim-8900) Creating design debug database vsim.dbg.
-# Simulation succeeded
-# ** Note: $stop    : riscv_pipelined.sv(117)
-#    Time: 275 ns  Iteration: 1  Instance: /testbench
-# Break in Module testbench at riscv_pipelined.sv line 117
-quit
-# End time: 07:41:00 on Apr 10,2023, Elapsed time: 0:00:15
-# Errors: 0, Warnings: 0
+# ** Error: (vsim-8357) Internal debugDB error id:ct1  ret:1 table context_tbl already exists
+# Debug data file does not match loaded design.
+# Debug data file does not match loaded design.
+# ** Error: Could not open the database because of the following problem accessing the required debug information:
+# Debug data file does not match loaded design.
+# Error in macro ./riscv_pipelined.do line 86
+# Could not open the database because of the following problem accessing the required debug information:
+# Debug data file does not match loaded design.
+#     while executing
+# "add schematic -full sim:/testbench/dut/rv32pipe"
+# End time: 16:02:31 on Apr 05,2024, Elapsed time: 0:00:38
+# Errors: 2, Warnings: 2
