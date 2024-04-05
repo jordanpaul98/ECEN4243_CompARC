@@ -92,7 +92,7 @@ module testbench();
    initial
      begin
 	string memfilename;
-        memfilename = {"programs/riscvtest.memfile"};
+        memfilename = {"../programs/riscvtest.memfile"};
         // memfilename = {"testing/add.memfile"};
         // memfilename = {"testing/addi.memfile"};
         // memfilename = {"testing/and.memfile"};	
@@ -196,7 +196,7 @@ module riscv(input  logic         clk, reset,
    logic [2:0] 		ImmSrcD;
    logic 			    ZeroE;
    logic 			    PCSrcE;
-   logic [3:0] 		ALUControlE;
+   logic [2:0] 		ALUControlE;
    logic 			    ALUSrcE;
    logic 			    ResultSrcEb0;
    logic 			    RegWriteM;
@@ -241,7 +241,7 @@ module controller(input  logic		 clk, reset,
                   input  logic 	     FlushE, 
                   input  logic 	     ZeroE, 
                   output logic 	     PCSrcE, // for datapath and Hazard Unit
-                  output logic [3:0] ALUControlE, 
+                  output logic [2:0] ALUControlE, 
                   output logic 	     ALUSrcE,
                   output logic 	     ResultSrcEb0, // for Hazard Unit
                   // Memory stage control signals
@@ -258,7 +258,7 @@ module controller(input  logic		 clk, reset,
    logic 			     JumpD,      JumpE;
    logic 			     BranchD,    BranchE;
    logic [1:0] 		 ALUOpD;
-   logic [3:0] 		 ALUControlD;
+   logic [2:0] 		 ALUControlD;
    logic 			     ALUSrcD;
    
    // Decode stage logic
@@ -300,6 +300,7 @@ module maindec(input  logic [6:0] op,
    // Change-Note:
    // increased ImmSrc to 3 bits. extended controls by 1 bit
    //
+   // TODO: increate ALUSrc to 2 bits.
 
    logic [11:0] 		  controls;
 
@@ -330,25 +331,25 @@ module aludec(input  logic        opb5,
               input  logic [2:0]  funct3,
               input  logic 	      funct7b5, 
               input  logic [1:0]  ALUOp,
-              output logic [3:0]  ALUControl);
+              output logic [2:0]  ALUControl);
 
    logic 			 RtypeSub;
    assign RtypeSub = funct7b5 & opb5;  // TRUE for R-type subtract instruction
 
    always_comb
      case(ALUOp)
-       2'b00:                ALUControl = 4'b0000; // addition
-       2'b01:                ALUControl = 4'b0001; // subtraction
+       2'b00:                ALUControl = 3'b000; // addition
+       2'b01:                ALUControl = 3'b001; // subtraction
        default: case(funct3) // R-type or I-type ALU
                   3'b000:  if (RtypeSub) 
-                             ALUControl = 4'b0001; // sub
+                    ALUControl = 3'b001; // sub
                   else          
-                             ALUControl = 4'b0000; // add, addi
-                  3'b010:    ALUControl = 4'b0101; // slt, slti
-                  3'b110:    ALUControl = 4'b0011; // or, ori
-                  3'b111:    ALUControl = 4'b0010; // and, andi
-                  default:   ALUControl = 4'bxxxx; // ???
-		   endcase
+                    ALUControl = 3'b000; // add, addi
+                  3'b010:    ALUControl = 3'b101; // slt, slti
+                  3'b110:    ALUControl = 3'b011; // or, ori
+                  3'b111:    ALUControl = 3'b010; // and, andi
+                  default:   ALUControl = 3'bxxx; // ???
+		endcase
      endcase
 endmodule
 
@@ -371,7 +372,7 @@ module datapath(input  logic        clk, reset,
                 input  logic 	      FlushE,
                 input  logic [1:0]  ForwardAE, ForwardBE,
                 input  logic 	      PCSrcE,
-                input  logic [3:0]  ALUControlE,
+                input  logic [2:0]  ALUControlE,
                 input  logic 	      ALUSrcE,
                 output logic 	      ZeroE,
                 // Memory stage signals
@@ -664,7 +665,7 @@ endmodule // dmem
 // ========================================================================
 
 module alu(input  logic [31:0] a, b,
-           input  logic [3:0]  alucontrol,
+           input logic [2:0]   alucontrol,
            output logic [31:0] result,
            output logic        zero);
 
@@ -679,14 +680,14 @@ module alu(input  logic [31:0] a, b,
 
    always_comb
      case (alucontrol)
-       4'b0000:  result = sum;         // add
-       4'b0001:  result = sum;         // subtract
-       4'b0010:  result = a & b;       // and
-       4'b0011:  result = a | b;       // or
-       4'b0100:  result = a ^ b;       // xor
-       4'b0101:  result = sum[31] ^ v; // slt
-       4'b0110:  result = a << b[4:0]; // sll
-       4'b0111:  result = a >> b[4:0]; // srl
+       3'b000:  result = sum;         // add
+       3'b001:  result = sum;         // subtract
+       3'b010:  result = a & b;       // and
+       3'b011:  result = a | b;       // or
+       3'b100:  result = a ^ b;       // xor
+       3'b101:  result = sum[31] ^ v; // slt
+       3'b110:  result = a << b[4:0]; // sll
+       3'b111:  result = a >> b[4:0]; // srl
        default: result = 32'bx;
      endcase
 
@@ -694,4 +695,3 @@ module alu(input  logic [31:0] a, b,
    assign v = ~(alucontrol[0] ^ a[31] ^ b[31]) & (a[31] ^ sum[31]) & isAddSub;
    
 endmodule
-
