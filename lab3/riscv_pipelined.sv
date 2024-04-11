@@ -93,8 +93,8 @@ module testbench();
    initial
      begin
 	string memfilename;
-        memfilename = {"programs/riscvtest.memfile"};
-        // memfilename = {"testing/add.memfile"};
+        // memfilename = {"programs/riscvtest.memfile"};
+         memfilename = {"testing/add.memfile"};
         // memfilename = {"testing/addi.memfile"};
         // memfilename = {"testing/and.memfile"};	
         // memfilename = {"testing/andi.memfile"};
@@ -133,6 +133,7 @@ module testbench();
         // memfilename = {"testing/xori.memfile"};
         // memfilename = {"testing/ecall.memfile"};
 	$readmemh(memfilename, dut.imem.RAM);
+	$readmemh(memfilename, dut.dmem.RAM);
      end
    
    // initialize test
@@ -647,7 +648,7 @@ endmodule
 module imem (input  logic [31:0] a,
 	     output logic [31:0] rd);
    
-   logic [31:0] 		 RAM[63:0];
+   logic [31:0] 		 RAM[2047:0];
    
    assign rd = RAM[a[31:2]]; // word aligned
    
@@ -661,7 +662,7 @@ module dmem (input  logic        clk, we,
 	     input  logic [31:0] a, wd,
 	     output logic [31:0] rd);
    
-   logic [31:0] 		 RAM[255:0];
+   logic [31:0] 		 RAM[2047:0];
    
    assign rd = RAM[a[31:2]]; // word aligned
    always_ff @(posedge clk)
