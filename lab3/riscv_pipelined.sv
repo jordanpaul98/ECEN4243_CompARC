@@ -267,7 +267,8 @@ module controller(input  logic		 clk, reset,
    aludec  ad(opD[5], funct3D, funct7b5D, ALUOpD, ALUControlD);
    
    // Execute stage pipeline control register and logic
-   floprc #(10) controlregE(clk, reset, FlushE,
+   // NOTE #(10) is the WIDTH size
+   floprc #(11) controlregE(clk, reset, FlushE,
                             {RegWriteD, ResultSrcD, MemWriteD, JumpD, BranchD, ALUControlD, ALUSrcD},
                             {RegWriteE, ResultSrcE, MemWriteE, JumpE, BranchE, ALUControlE, ALUSrcE});
 
@@ -307,6 +308,9 @@ module maindec(input  logic [6:0] op,
    assign {RegWrite, ImmSrc, ALUSrc, MemWrite,
            ResultSrc, Branch, ALUOp, Jump} = controls;
 
+	//7'b0010111: controls = 13'b1_100_11_0_00_0_00_0; // auipc    
+    //7'b0110111: controls = 13'b1_100_01_0_00_0_11_0; // lui 
+
    always_comb
      case(op)
        // RegWrite_ImmSrc_ALUSrc_MemWrite_ResultSrc_Branch_ALUOp_Jump
@@ -317,9 +321,8 @@ module maindec(input  logic [6:0] op,
        7'b0010011: controls = 12'b1_000_1_0_00_0_10_0; // I-type ALU
        7'b1101111: controls = 12'b1_011_0_0_10_0_00_1; // jal
        7'b0000000: controls = 12'b0_000_0_0_00_0_00_0; // need valid values at reset
-       //7'b0010111: controls = 13'b1_100_11_0_00_0_00_0; // auipc    
-       //7'b0110111: controls = 13'b1_100_01_0_00_0_11_0; // lui 
-       default:    controls = 12'bx_xx_x_x_xx_x_xx_x;  // non-implemented instruction
+       
+       default:    controls = 12'bx_xxx_x_x_xx_x_xx_x;  // non-implemented instruction
      endcase
 endmodule
 
@@ -665,7 +668,7 @@ endmodule // dmem
 // ========================================================================
 
 module alu(input  logic [31:0] a, b,
-           input logic [3:0]   alucontrol,
+           input logic  [3:0]   alucontrol,
            output logic [31:0] result,
            output logic        zero);
 
