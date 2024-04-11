@@ -78,6 +78,7 @@
 //   sw           0100011   010       immediate
 //   jal          1101111   immediate immediate
 
+
 module testbench();
 
    logic        clk;
@@ -342,7 +343,8 @@ module aludec(input  logic        opb5,
    always_comb
      case(ALUOp)
        2'b00:                ALUControl = 4'b0000; // addition
-       2'b01:                ALUControl = 4'b0001; // subtraction
+       2'b01:                ALUControl = 4'b0001; // subtraction covers: sub, beq, bne, blt, bge, bltu, bgeu
+	   2'b11:				 ALUControl = 4'b1111; // LUI
        default: case(funct3) // R-type or I-type ALU
                   3'b000:  if (RtypeSub) 
                     ALUControl = 4'b0001; // sub
@@ -351,6 +353,10 @@ module aludec(input  logic        opb5,
                   3'b010:    ALUControl = 4'b0101; // slt, slti
                   3'b110:    ALUControl = 4'b0011; // or, ori
                   3'b111:    ALUControl = 4'b0010; // and, andi
+				  3'b100:	 ALUControl = 4'b0100; // xor, xori
+				  3'b101:    ALUControl = funct7b5 ? 4'b1000 : 4'b0110; // sra, srai || srl, srli
+				  3'b001:	 ALUControl = 4'b0111; // sll, slli
+				  3'b011:	 ALUControl = 4'b1001; // sltiu sltu
                   default:   ALUControl = 4'bxxxx; // ???
 		endcase
      endcase
@@ -684,13 +690,18 @@ module alu(input  logic [31:0] a, b,
    always_comb
      case (alucontrol)
        4'b0000:  result = sum;         // add
-       4'b0001:  result = sum;         // subtract
+       4'b0001:  result = sum;         // subtract && beq, bne, blt, bge, bltu, bgeu
        4'b0010:  result = a & b;       // and
        4'b0011:  result = a | b;       // or
        4'b0100:  result = a ^ b;       // xor
        4'b0101:  result = sum[31] ^ v; // slt
-       4'b0110:  result = a << b[4:0]; // sll
-       4'b0111:  result = a >> b[4:0]; // srl
+	
+       4'b0110:  result = a >> unsigned'(b[4:0]); // srl, srli
+	   4'b0111:  result = a << unsigned'(b[4:0]); // sll, slli
+	   4'b1000:  result = $signed(a) >>> unsigned'(b[4:0]); // sra, srai
+	   4'b1001:  result = unsigned'(a) < unsigned'(b); // sltiu, sltu
+	   
+	   4'b1111:  result = b; // lui
        default: result = 32'bx;
      endcase
 
