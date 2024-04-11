@@ -100,42 +100,41 @@ module testbench();
 		
         // memfilename = {"testing/add.memfile"};    // works
         // memfilename = {"testing/addi.memfile"};   // works
-        // memfilename = {"testing/and.memfile"};		// works
-        // memfilename = {"testing/andi.memfile"};	// works
+        // memfilename = {"testing/and.memfile"};	 // works
+        // memfilename = {"testing/andi.memfile"};	 // works
         // memfilename = {"testing/auipc.memfile"};
         // memfilename = {"testing/beq.memfile"};		// works
         // memfilename = {"testing/bge.memfile"};		// failed
         // memfilename = {"testing/bgeu.memfile"};		// failed
         // memfilename = {"testing/blt.memfile"};	// failed
         // memfilename = {"testing/bltu.memfile"};	// failed
-        // memfilename = {"testing/bne.memfile"};	// works
-         memfilename = {"testing/jal.memfile"};	
+         memfilename = {"testing/bne.memfile"};	// works
+        // memfilename = {"testing/jal.memfile"};	 // works
         // memfilename = {"testing/jalr.memfile"};
         // memfilename = {"testing/lb.memfile"};	
         // memfilename = {"testing/lbu.memfile"};	
         // memfilename = {"testing/lh.memfile"};
         // memfilename = {"testing/lhu.memfile"};	
-        // memfilename = {"testing/lui.memfile"};
+        // memfilename = {"testing/lui.memfile"};    // works
         // memfilename = {"testing/lw.memfile"};
-        // memfilename = {"testing/or.memfile"};
-        // memfilename = {"testing/ori.memfile"};
+        // memfilename = {"testing/or.memfile"};	// works
+        // memfilename = {"testing/ori.memfile"};	// works
         // memfilename = {"testing/sb.memfile"};
         // memfilename = {"testing/sh.memfile"};
-        // memfilename = {"testing/sll.memfile"};	
-        // memfilename = {"testing/slli.memfile"};	
-        // memfilename = {"testing/slt.memfile"};
-        // memfilename = {"testing/slti.memfile"};
-        // memfilename = {"testing/sltiu.memfile"};
-        // memfilename = {"testing/sltu.memfile"};
-        // memfilename = {"testing/sra.memfile"};
-        // memfilename = {"testing/srai.memfile"};
-        // memfilename = {"testing/srl.memfile"};
-        // memfilename = {"testing/srli.memfile"};
-        // memfilename = {"testing/sub.memfile"};
+        // memfilename = {"testing/sll.memfile"};	// works	
+        // memfilename = {"testing/slli.memfile"};	// works
+        // memfilename = {"testing/slt.memfile"};	// works
+        // memfilename = {"testing/slti.memfile"};  // works
+        // memfilename = {"testing/sltiu.memfile"}; // works
+        // memfilename = {"testing/sltu.memfile"};	// works
+        // memfilename = {"testing/sra.memfile"};	// works
+        // memfilename = {"testing/srai.memfile"};  // works
+        // memfilename = {"testing/srl.memfile"};	// works
+        // memfilename = {"testing/srli.memfile"};	// works
+        // memfilename = {"testing/sub.memfile"};	// works
         // memfilename = {"testing/sw.memfile"};
-        // memfilename = {"testing/xor.memfile"};
-        // memfilename = {"testing/xori.memfile"};
-        // memfilename = {"testing/ecall.memfile"};
+        // memfilename = {"testing/xor.memfile"};	// works
+        // memfilename = {"testing/xori.memfile"};	// works
 	$readmemh(memfilename, dut.imem.RAM);
 	$readmemh(memfilename, dut.dmem.RAM);
      end
@@ -328,6 +327,7 @@ module maindec(input  logic [6:0] op,
        7'b0010011: controls = 12'b1_000_1_0_00_0_10_0; // I-type ALU
        7'b1101111: controls = 12'b1_011_0_0_10_0_00_1; // jal
 	   7'b0110111: controls = 12'b1_100_1_0_00_0_11_0; // lui
+	   //7'b0010111: controls = 13'b1_100_11_0_00_0_00_0; // auipc
 	   
        7'b0000000: controls = 12'b0_000_0_0_00_0_00_0; // need valid values at reset
 	   7'b1110011: controls = 12'b0_000_0_0_00_0_00_0; // ecall
@@ -693,9 +693,11 @@ module alu(input  logic [31:0] a, b,
            output logic [31:0] result,
            output logic        zero);
 
-   logic [31:0] 	       condinvb, sum;
-   logic 		       v;              // overflow
+   logic [31:0] 	   condinvb, sum;
+   logic 		       v, carry, negative, zeroB;              // overflow
    logic 		       isAddSub;       // true when is add or sub
+	
+   logic [32:0]  carried;
 
    assign condinvb = alucontrol[0] ? ~b : b;
    assign sum = a + condinvb + alucontrol[0];
@@ -719,8 +721,25 @@ module alu(input  logic [31:0] a, b,
 	   4'b1111:  result = b; // lui
        default: result = 32'bx;
      endcase
-
-   assign zero = (result == 32'b0) ^ funct3E[0];
+	
+   // sub with extra carry bit
+   assign carried = a - b;
+   
+   assign carry = carried[32];
+   assign negative = sum[31];
    assign v = ~(alucontrol[0] ^ a[31] ^ b[31]) & (a[31] ^ sum[31]) & isAddSub;
+   
+   always_comb
+     case (funct3E)
+		3'b000:  assign zeroB = (result == 32'b0); 	// beq =
+		3'b001:  assign zeroB = (result == 32'b0); 	// bne !=
+		3'b100:  assign zeroB = (negative ^ v);  	// blt <
+		3'b101:  assign zeroB = (negative ^ v);   	// bge >=
+		3'b110:  assign zeroB = carry; 				// bltu < unsigned
+		3'b111:  assign zeroB = carry; 				// bgeu >= unsigned
+		default: assign zeroB = (result == 32'b0);
+     endcase
+   
+   assign zero = zeroB ^ funct3E[0];
    
 endmodule
