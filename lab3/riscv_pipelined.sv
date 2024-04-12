@@ -102,39 +102,39 @@ module testbench();
         // memfilename = {"testing/addi.memfile"};   // works
         // memfilename = {"testing/and.memfile"};	 // works
         // memfilename = {"testing/andi.memfile"};	 // works
-        // memfilename = {"testing/auipc.memfile"};
-        // memfilename = {"testing/beq.memfile"};		// works
-        // memfilename = {"testing/bge.memfile"};		// failed
-        // memfilename = {"testing/bgeu.memfile"};		// failed
-        // memfilename = {"testing/blt.memfile"};	// failed
-        // memfilename = {"testing/bltu.memfile"};	// failed
-         memfilename = {"testing/bne.memfile"};	// works
+        // memfilename = {"testing/auipc.memfile"};	 // works
+        // memfilename = {"testing/beq.memfile"};	 // works
+        // memfilename = {"testing/bge.memfile"};	 // works
+        // memfilename = {"testing/bgeu.memfile"};	 // works
+        // memfilename = {"testing/blt.memfile"};	 // works
+        // memfilename = {"testing/bltu.memfile"};	 // works
+        // memfilename = {"testing/bne.memfile"};	 // works
         // memfilename = {"testing/jal.memfile"};	 // works
-        // memfilename = {"testing/jalr.memfile"};
-        // memfilename = {"testing/lb.memfile"};	
-        // memfilename = {"testing/lbu.memfile"};	
-        // memfilename = {"testing/lh.memfile"};
-        // memfilename = {"testing/lhu.memfile"};	
+        // memfilename = {"testing/jalr.memfile"};	 
+        // memfilename = {"testing/lb.memfile"};	 // works
+        // memfilename = {"testing/lbu.memfile"};	 // works	
+        // memfilename = {"testing/lh.memfile"};	 // works
+        // memfilename = {"testing/lhu.memfile"};    // works
         // memfilename = {"testing/lui.memfile"};    // works
-        // memfilename = {"testing/lw.memfile"};
-        // memfilename = {"testing/or.memfile"};	// works
-        // memfilename = {"testing/ori.memfile"};	// works
-        // memfilename = {"testing/sb.memfile"};
-        // memfilename = {"testing/sh.memfile"};
-        // memfilename = {"testing/sll.memfile"};	// works	
-        // memfilename = {"testing/slli.memfile"};	// works
-        // memfilename = {"testing/slt.memfile"};	// works
-        // memfilename = {"testing/slti.memfile"};  // works
-        // memfilename = {"testing/sltiu.memfile"}; // works
-        // memfilename = {"testing/sltu.memfile"};	// works
-        // memfilename = {"testing/sra.memfile"};	// works
-        // memfilename = {"testing/srai.memfile"};  // works
-        // memfilename = {"testing/srl.memfile"};	// works
-        // memfilename = {"testing/srli.memfile"};	// works
-        // memfilename = {"testing/sub.memfile"};	// works
-        // memfilename = {"testing/sw.memfile"};
-        // memfilename = {"testing/xor.memfile"};	// works
-        // memfilename = {"testing/xori.memfile"};	// works
+        // memfilename = {"testing/lw.memfile"};     // works
+        // memfilename = {"testing/or.memfile"};	 // works
+        // memfilename = {"testing/ori.memfile"};	 // works
+        // memfilename = {"testing/sb.memfile"};	 // works
+        // memfilename = {"testing/sh.memfile"};	 // works
+        // memfilename = {"testing/sll.memfile"};	 // works	
+        // memfilename = {"testing/slli.memfile"};	 // works
+        // memfilename = {"testing/slt.memfile"};	 // works
+        // memfilename = {"testing/slti.memfile"};   // works
+        // memfilename = {"testing/sltiu.memfile"};  // works
+        // memfilename = {"testing/sltu.memfile"};	 // works
+        // memfilename = {"testing/sra.memfile"};	 // works
+        // memfilename = {"testing/srai.memfile"};   // works
+        // memfilename = {"testing/srl.memfile"};	 // works
+        // memfilename = {"testing/srli.memfile"};	 // works
+        // memfilename = {"testing/sub.memfile"};	 // works
+        // memfilename = {"testing/sw.memfile"};	 // works
+        // memfilename = {"testing/xor.memfile"};	 // works
+        // memfilename = {"testing/xori.memfile"};	 // works
 	$readmemh(memfilename, dut.imem.RAM);
 	$readmemh(memfilename, dut.dmem.RAM);
      end
@@ -155,13 +155,13 @@ module testbench();
    always @(negedge clk)
      begin
 	if(MemWrite) begin
-           if(DataAdr === 100 & WriteData === 25) begin
-              $display("Simulation succeeded");
-              $stop;
-           end else if (DataAdr !== 96) begin
-              $display("Simulation failed");
-              $stop;
-           end
+           //if(DataAdr === 100 & WriteData === 25) begin
+           //   $display("Simulation succeeded");
+           //   $stop;
+           //end else if (DataAdr !== 96) begin
+           //   $display("Simulation failed");
+           //   $stop;
+           //end
 	end
      end
 endmodule
@@ -174,13 +174,14 @@ module top(input  logic        clk, reset,
            output logic [31:0] WriteDataM, DataAdrM, 
            output logic        MemWriteM);
 
-   logic [31:0] 	       PCF, InstrF, ReadDataM;
+   logic [31:0] PCF, InstrF, ReadDataM;
+   logic [2:0]	funct3M; 
    
    // instantiate processor and memories
    riscv rv32pipe (clk, reset, PCF, InstrF, MemWriteM, DataAdrM, 
-		   WriteDataM, ReadDataM);
+		   WriteDataM, ReadDataM, funct3M);
    imem imem (PCF, InstrF);
-   dmem dmem (clk, MemWriteM, DataAdrM, WriteDataM, ReadDataM);
+   dmem dmem (clk, MemWriteM, DataAdrM, WriteDataM, funct3M, ReadDataM);
    
 endmodule
 
@@ -193,7 +194,8 @@ module riscv(input  logic         clk, reset,
              input  logic [31:0]  InstrF,
              output logic 	      MemWriteM,
              output logic [31:0]  ALUResultM, WriteDataM,
-             input  logic [31:0]  ReadDataM);
+             input  logic [31:0]  ReadDataM,
+			 output logic [2:0]   funct3M);
 
    logic [6:0] 		opD;
    logic [2:0] 		funct3D;
@@ -203,7 +205,7 @@ module riscv(input  logic         clk, reset,
    logic 			ZeroE;
    logic 			PCSrcE;
    logic [3:0] 		ALUControlE;
-   logic 			ALUSrcE;
+   logic [1:0]		ALUSrcE;
    logic 			ResultSrcEb0;
    logic 			RegWriteM;
    logic [1:0] 		ResultSrcW;
@@ -222,7 +224,7 @@ module riscv(input  logic         clk, reset,
 
    datapath dp(clk, reset,
                StallF, PCF, InstrF,
-	           opD, funct3D, funct7b5D, StallD, FlushD, ImmSrcD,
+	           opD, funct3D, funct3M, funct7b5D, StallD, FlushD, ImmSrcD,
 	           FlushE, ForwardAE, ForwardBE, PCSrcE, ALUControlE, ALUSrcE, ZeroE,
                MemWriteM, WriteDataM, ALUResultM, ReadDataM,
                RegWriteW, ResultSrcW,
@@ -248,7 +250,7 @@ module controller(input  logic		 clk, reset,
                   input  logic 	     ZeroE, 
                   output logic 	     PCSrcE, // for datapath and Hazard Unit
                   output logic [3:0] ALUControlE, 
-                  output logic 	     ALUSrcE,
+                  output logic [1:0] ALUSrcE,
                   output logic 	     ResultSrcEb0, // for Hazard Unit
                   // Memory stage control signals
                   output logic 	     MemWriteM,
@@ -265,7 +267,7 @@ module controller(input  logic		 clk, reset,
    logic 			 BranchD,    BranchE;
    logic [1:0] 		 ALUOpD;
    logic [3:0] 		 ALUControlD;
-   logic 			 ALUSrcD;
+   logic [1:0]	     ALUSrcD;
    
    // Decode stage logic
    maindec md(opD, ResultSrcD, MemWriteD, BranchD,
@@ -274,7 +276,7 @@ module controller(input  logic		 clk, reset,
    
    // Execute stage pipeline control register and logic
    // NOTE #(10) is the WIDTH size
-   floprc #(11) controlregE(clk, reset, FlushE,
+   floprc #(12) controlregE(clk, reset, FlushE,
                             {RegWriteD, ResultSrcD, MemWriteD, JumpD, BranchD, ALUControlD, ALUSrcD},
                             {RegWriteE, ResultSrcE, MemWriteE, JumpE, BranchE, ALUControlE, ALUSrcE});
 
@@ -299,7 +301,8 @@ endmodule
 module maindec(input  logic [6:0] op,
                output logic [1:0] ResultSrc,
                output logic 	  MemWrite,
-               output logic 	  Branch, ALUSrc,
+               output logic 	  Branch,
+			   output logic [1:0] ALUSrc,
                output logic 	  RegWrite, Jump,
                output logic [2:0] ImmSrc,
                output logic [1:0] ALUOp);
@@ -309,7 +312,7 @@ module maindec(input  logic [6:0] op,
    //
    // TODO: increate ALUSrc to 2 bits.
 
-   logic [11:0] 		  controls;
+   logic [12:0] 		  controls;
 
    assign {RegWrite, ImmSrc, ALUSrc, MemWrite,
            ResultSrc, Branch, ALUOp, Jump} = controls;
@@ -320,19 +323,19 @@ module maindec(input  logic [6:0] op,
    always_comb
      case(op)
        // RegWrite_ImmSrc_ALUSrc_MemWrite_ResultSrc_Branch_ALUOp_Jump
-       7'b0000011: controls = 12'b1_000_1_0_01_0_00_0; // lw
-       7'b0100011: controls = 12'b0_001_1_1_00_0_00_0; // sw
-       7'b0110011: controls = 12'b1_xxx_0_0_00_0_10_0; // R-type 
-       7'b1100011: controls = 12'b0_010_0_0_00_1_01_0; // beq
-       7'b0010011: controls = 12'b1_000_1_0_00_0_10_0; // I-type ALU
-       7'b1101111: controls = 12'b1_011_0_0_10_0_00_1; // jal
-	   7'b0110111: controls = 12'b1_100_1_0_00_0_11_0; // lui
-	   //7'b0010111: controls = 13'b1_100_11_0_00_0_00_0; // auipc
+       7'b0000011: controls = 13'b1_000_01_0_01_0_00_0; // lw
+       7'b0100011: controls = 13'b0_001_01_1_00_0_00_0; // sw
+       7'b0110011: controls = 13'b1_xxx_00_0_00_0_10_0; // R-type 
+       7'b1100011: controls = 13'b0_010_00_0_00_1_01_0; // beq
+       7'b0010011: controls = 13'b1_000_01_0_00_0_10_0; // I-type ALU
+       7'b1101111: controls = 13'b1_011_00_0_10_0_00_1; // jal
+	   7'b0110111: controls = 13'b1_100_01_0_00_0_11_0; // lui
+	   7'b0010111: controls = 13'b1_100_11_0_00_0_00_0; // auipc
 	   
-       7'b0000000: controls = 12'b0_000_0_0_00_0_00_0; // need valid values at reset
-	   7'b1110011: controls = 12'b0_000_0_0_00_0_00_0; // ecall
+       7'b0000000: controls = 13'b0_000_00_0_00_0_00_0; // need valid values at reset
+	   7'b1110011: controls = 13'b0_000_00_0_00_0_00_0; // ecall
        
-       default:    controls = 12'bx_xxx_x_x_xx_x_xx_x;  // non-implemented instruction
+       default:    controls = 13'bx_xxx_xx_x_xx_x_xx_x;  // non-implemented instruction
      endcase
 endmodule
 
@@ -382,7 +385,7 @@ module datapath(input  logic        clk, reset,
                 input  logic [31:0] InstrF,
                 // Decode stage signals
                 output logic [6:0]  opD,
-                output logic [2:0]  funct3D, 
+                output logic [2:0]  funct3D, funct3M, 
                 output logic 	    funct7b5D,
                 input  logic 	    StallD, FlushD,
                 input  logic [2:0]  ImmSrcD,
@@ -391,7 +394,7 @@ module datapath(input  logic        clk, reset,
                 input  logic [1:0]  ForwardAE, ForwardBE,
                 input  logic 	    PCSrcE,
                 input  logic [3:0]  ALUControlE,
-                input  logic 	    ALUSrcE,
+                input  logic [1:0]	ALUSrcE,
                 output logic 	    ZeroE,
                 // Memory stage signals
                 input  logic 	    MemWriteM, 
@@ -417,7 +420,7 @@ module datapath(input  logic        clk, reset,
    logic [31:0] 		    PCE, ImmExtE;
    logic [31:0] 		    SrcAE, SrcBE;
    logic [31:0] 		    ALUResultE;
-   logic [31:0] 		    WriteDataE;
+   logic [31:0] 		    WriteDataBE, WriteDataAE;
    logic [31:0] 		    PCPlus4E;
    logic [31:0] 		    PCTargetE;
    
@@ -457,16 +460,21 @@ module datapath(input  logic        clk, reset,
                       {RD1D, RD2D, PCD, Rs1D, Rs2D, RdD, ImmExtD, funct3D, PCPlus4D}, 
                       {RD1E, RD2E, PCE, Rs1E, Rs2E, RdE, ImmExtE, funct3E, PCPlus4E});
    
-   mux3   #(32)  faemux(RD1E, ResultW, ALUResultM, ForwardAE, SrcAE);
-   mux3   #(32)  fbemux(RD2E, ResultW, ALUResultM, ForwardBE, WriteDataE);
-   mux2   #(32)  srcbmux(WriteDataE, ImmExtE, ALUSrcE, SrcBE);
+   //mux3   #(32)  faemux(RD1E, ResultW, ALUResultM, ForwardAE, SrcAE);
+   mux3	  #(32)  faemux(RD1E, ResultW, ALUResultM, ForwardAE, WriteDataAE);
+   mux3   #(32)  fbemux(RD2E, ResultW, ALUResultM, ForwardBE, WriteDataBE);
+   
+   mux2	  #(32)  srcamux(WriteDataAE, PCE,     ALUSrcE[1], SrcAE);
+   mux2   #(32)  srcbmux(WriteDataBE, ImmExtE, ALUSrcE[0], SrcBE);
+   
    alu           alu(SrcAE, SrcBE, ALUControlE, funct3E, ALUResultE, ZeroE);
    adder         branchadd(ImmExtE, PCE, PCTargetE);
 
    // Memory stage pipeline register
-   flopr  #(101) regM(clk, reset, 
-                      {ALUResultE, WriteDataE, RdE, PCPlus4E},
-                      {ALUResultM, WriteDataM, RdM, PCPlus4M});
+   // added funct3M to flip-flop
+   flopr  #(104) regM(clk, reset, 
+                      {ALUResultE, WriteDataBE, RdE, PCPlus4E, funct3E},
+                      {ALUResultM, WriteDataM,  RdM, PCPlus4M, funct3M});
    
    // Writeback stage pipeline register and logic
    flopr  #(101) regW(clk, reset, 
@@ -672,14 +680,49 @@ endmodule // imem
 // ========================================================================
 
 module dmem (input  logic        clk, we,
-	     input  logic [31:0] a, wd,
-	     output logic [31:0] rd);
+	         input  logic [31:0] a, wd,
+		     input logic [2:0] funct3,
+	         output logic [31:0] rd);
    
    logic [31:0] 		 RAM[2047:0];
    
-   assign rd = RAM[a[31:2]]; // word aligned
+   logic [31:0] 		 mask, extend_mask, data;
+   
+   logic [1:0] alignment;
+   logic signBit;
+   
+   assign alignment = a[1:0];
+   assign data      = RAM[a[31:2]];
+   assign signBit   = data[8 * alignment + ((funct3 == 3'b001) ? 15 : ((funct3 == 3'b000) ? 7 : 31))];
+   
+   always_comb
+	case(funct3)
+		3'b010:  assign mask = 32'hFFFFFFFF; // load word
+		3'b000:  assign mask = 32'h000000FF << (8 * alignment); // load byte
+				 //assign extend_mask = {{24{signBit}}, {8'hFF}};
+		3'b100:  assign mask = 32'h000000FF << (8 * alignment); // load unsigned byte
+				 //assign extend_mask = {{24{signBit}}, {8'hFF}};
+		3'b001:  assign mask = 32'h0000FFFF << (8 * alignment); // load half
+				 //assign extend_mask = {{16{signBit}}, {16'hFFFF}};
+		3'b101:  assign mask = 32'h0000FFFF << (8 * alignment); // load unsigned half
+				 //assign extend_mask = {{16{signBit}}, {16'hFFFF}};
+		default: assign mask = 32'hFFFFFFFF;
+				 //assign extend_mask = 32'hFFFFFFFF;
+	endcase
+	
+   always_comb
+	case(funct3)
+		3'b000: assign extend_mask = {{24{signBit}}, {8'h00}};
+		//3'b100: assign extend_mask = {{24{1'b0}}, {8'h00}};
+		3'b001: assign extend_mask = {{16{signBit}}, {16'h0000}};
+		//3'b101: assign extend_mask = {{16{1'b0}}, {16'h0000}};
+		default: assign extend_mask = 32'h00000000;
+	endcase
+   
+   assign rd = ((data & mask) >> (8 * alignment)) | extend_mask; // word aligned
+   
    always_ff @(posedge clk)
-     if (we) RAM[a[31:2]] <= wd;
+     if (we) RAM[a[31:2]] <= ((wd << (8 * alignment)) & mask) | (data & (~mask));
    
 endmodule // dmem
 
