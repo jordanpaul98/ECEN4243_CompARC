@@ -786,3 +786,4 @@ module alu(input  logic [31:0] a, b,
    assign zero = zeroB ^ funct3E[0];
    
 endmodule
+
