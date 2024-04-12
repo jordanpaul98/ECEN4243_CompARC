@@ -98,7 +98,7 @@ module testbench();
 		// memfilename = {"programs/bne-test.memfile"};
 		
 		
-         memfilename = {"testing/add.memfile"};    // works
+        // memfilename = {"testing/add.memfile"};    // works
         // memfilename = {"testing/addi.memfile"};   // works
         // memfilename = {"testing/and.memfile"};	 // works
         // memfilename = {"testing/andi.memfile"};	 // works
@@ -127,7 +127,7 @@ module testbench();
         // memfilename = {"testing/slti.memfile"};   // works
         // memfilename = {"testing/sltiu.memfile"};  // works
         // memfilename = {"testing/sltu.memfile"};	 // works
-        // memfilename = {"testing/sra.memfile"};	 // works
+         memfilename = {"testing/sra.memfile"};	 // works
         // memfilename = {"testing/srai.memfile"};   // works
         // memfilename = {"testing/srl.memfile"};	 // works
         // memfilename = {"testing/srli.memfile"};	 // works
@@ -215,14 +215,14 @@ module riscv(input  logic         clk, reset,
    logic 			StallF, StallD, FlushD, FlushE;
 
    logic [4:0] 		Rs1D, Rs2D, Rs1E, Rs2E, RdE, RdM, RdW;
-   logic            PCTargetSrc; // for jalr
+   logic            PCTargetSrcE; // for jalr
    
    controller c(clk, reset,
                 opD, funct3D, funct7b5D, ImmSrcD,
                 FlushE, ZeroE, PCSrcE, ALUControlE, ALUSrcE, ResultSrcEb0,
                 MemWriteM, RegWriteM, 
                 RegWriteW, ResultSrcW,
-				PCTargetSrc);
+				PCTargetSrcE);
 
    datapath dp(clk, reset,
                StallF, PCF, InstrF,
@@ -230,7 +230,7 @@ module riscv(input  logic         clk, reset,
 	           FlushE, ForwardAE, ForwardBE, PCSrcE, ALUControlE, ALUSrcE, ZeroE,
                MemWriteM, WriteDataM, ALUResultM, ReadDataM,
                RegWriteW, ResultSrcW,
-               Rs1D, Rs2D, Rs1E, Rs2E, RdE, RdM, RdW, PCTargetSrc);
+               Rs1D, Rs2D, Rs1E, Rs2E, RdE, RdM, RdW, PCTargetSrcE);
 
    hazard  hu(Rs1D, Rs2D, Rs1E, Rs2E, RdE, RdM, RdW,
               PCSrcE, ResultSrcEb0, RegWriteM, RegWriteW,
@@ -260,7 +260,7 @@ module controller(input  logic		 clk, reset,
                   // Writeback stage control signals
                   output logic 	     RegWriteW, // for datapath and Hazard Unit
                   output logic [1:0] ResultSrcW,
-				  output logic       PCTargetSrc);
+				  output logic       PCTargetSrcE);
 
    // pipelined control signals
    logic 			 RegWriteD,  RegWriteE;
@@ -271,6 +271,7 @@ module controller(input  logic		 clk, reset,
    logic [1:0] 		 ALUOpD;
    logic [3:0] 		 ALUControlD;
    logic [1:0]	     ALUSrcD;
+   logic             PCTargetSrc;
    
    // Decode stage logic
    maindec md(opD, ResultSrcD, MemWriteD, BranchD,
@@ -279,9 +280,9 @@ module controller(input  logic		 clk, reset,
    
    // Execute stage pipeline control register and logic
    // NOTE #(10) is the WIDTH size
-   floprc #(12) controlregE(clk, reset, FlushE,
-                            {RegWriteD, ResultSrcD, MemWriteD, JumpD, BranchD, ALUControlD, ALUSrcD},
-                            {RegWriteE, ResultSrcE, MemWriteE, JumpE, BranchE, ALUControlE, ALUSrcE});
+   floprc #(13) controlregE(clk, reset, FlushE,
+                            {RegWriteD, ResultSrcD, MemWriteD, JumpD, BranchD, ALUControlD, ALUSrcD, PCTargetSrc},
+                            {RegWriteE, ResultSrcE, MemWriteE, JumpE, BranchE, ALUControlE, ALUSrcE, PCTargetSrcE});
 
    assign PCSrcE = (BranchE & ZeroE) | JumpE;
    assign ResultSrcEb0 = ResultSrcE[0];
@@ -309,7 +310,7 @@ module maindec(input  logic [6:0] op,
                output logic 	  RegWrite, Jump,
                output logic [2:0] ImmSrc,
                output logic [1:0] ALUOp,
-			   output logic       PCTargetSrc);
+		output logic       PCTargetSrc);
 
    // Change-Note:
    // increased ImmSrc to 3 bits. extended controls by 1 bit
@@ -333,12 +334,11 @@ module maindec(input  logic [6:0] op,
        7'b1100011: controls = 14'b0_010_00_0_00_1_01_0_0; // beq
        7'b0010011: controls = 14'b1_000_01_0_00_0_10_0_0; // I-type ALU
        7'b1101111: controls = 14'b1_011_00_0_10_0_00_0_1; // jal
-	   7'b1100111: controls = 14'b1_000_01_0_10_0_00_1_1; // jalr
-	   7'b0110111: controls = 14'b1_100_01_0_00_0_11_0_0; // lui
-	   7'b0010111: controls = 14'b1_100_11_0_00_0_00_0_0; // auipc
-	  
+       7'b1100111: controls = 14'b1_000_01_0_10_0_00_1_1; // jalr
+       7'b0110111: controls = 14'b1_100_01_0_00_0_11_0_0; // lui
+       7'b0010111: controls = 14'b1_100_11_0_00_0_00_0_0; // auipc  
        7'b0000000: controls = 14'b0_000_00_0_00_0_00_0_0; // need valid values at reset
-	   7'b1110011: controls = 14'b0_000_00_0_00_0_00_0_0; // ecall
+       7'b1110011: controls = 14'b0_000_00_0_00_0_00_0_0; // ecall
        
        default:    controls = 14'bx_xxx_xx_x_xx_x_xx_x_x;  // non-implemented instruction
      endcase
@@ -411,7 +411,7 @@ module datapath(input  logic        clk, reset,
                 // Hazard Unit signals 
                 output logic [4:0]  Rs1D, Rs2D, Rs1E, Rs2E,
                 output logic [4:0]  RdE, RdM, RdW,
-				input  logic         PCTargetSrc);
+				input  logic         PCTargetSrcE);
 
    // Fetch stage signals
    logic [31:0] 		    PCNextF, PCPlus4F;
@@ -429,7 +429,7 @@ module datapath(input  logic        clk, reset,
    logic [31:0] 		    WriteDataBE, WriteDataAE;
    logic [31:0] 		    PCPlus4E;
    logic [31:0] 		    PCTargetE;
-   logic [31:0]             PCTargetSel; // for jalr
+   logic [31:0]                     PCTargetSel; // for jalr
    
    // funct3 
    logic [2:0] 				funct3E;
@@ -475,7 +475,7 @@ module datapath(input  logic        clk, reset,
    mux2   #(32)  srcbmux(WriteDataBE, ImmExtE, ALUSrcE[0], SrcBE);
    
    // mux to switch between RS1 and PCE for jalr
-   mux2   #(32)  pcTargetmux(PCE, WriteDataAE, PCTargetSrc, PCTargetSel); 
+   mux2   #(32)  pcTargetmux(PCE, WriteDataAE, PCTargetSrcE, PCTargetSel); 
    
    alu           alu(SrcAE, SrcBE, ALUControlE, funct3E, ALUResultE, ZeroE);
    adder         branchadd(ImmExtE, PCTargetSel, PCTargetE);
